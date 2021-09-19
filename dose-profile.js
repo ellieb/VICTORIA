@@ -208,12 +208,6 @@ class DoseProfile { // eslint-disable-line no-unused-vars
     const xVoxels = parseInt(doseVol.data.voxelNumber[dim2])
     const yVoxels = parseInt(doseVol.data.voxelNumber[dim3])
 
-    // Process position to get centre voxel position rather than boundaries
-    position.map((val, i) => {
-      return val + (position[i + 1] - val) / 2
-    })
-    position.pop()
-
     const doseProfileData = new Array(totalSlices)
     const plotDensity = this.densityChecked() && densityVol
 
@@ -234,7 +228,7 @@ class DoseProfile { // eslint-disable-line no-unused-vars
 
       if (plotDensity) {
         doseProfileData[i] = {
-          position: position[i],
+          position: (position[i] + position[i + 1]) / 2,
           value: doseVol.data.dose[address] || 0,
           err: doseVol.data.error ? doseVol.data.error[address] || 0 : 0
           // density: densityVol.data.density[address]
@@ -242,7 +236,7 @@ class DoseProfile { // eslint-disable-line no-unused-vars
         }
       } else {
         doseProfileData[i] = {
-          position: position[i],
+          position: (position[i] + position[i + 1]) / 2,
           value: doseVol.data.dose[address] || 0,
           err: doseVol.data.error ? doseVol.data.error[address] || 0 : 0
         }
@@ -253,16 +247,14 @@ class DoseProfile { // eslint-disable-line no-unused-vars
     this.profileDim = profileDim
     this.minDoseVar = minDoseVar
     this.maxDoseVar = maxDoseVar
+    this.minMaxPos = [position[0], position[position.length - 1]]
   }
 
   /**
    * Set the dose scales based on the loaded data.
    * */
   setDoseScales () {
-    const [minPos, maxPos] = [
-      this.data[0].position,
-      this.data[this.data.length - 1].position
-    ]
+    const [minPos, maxPos] = this.minMaxPos
 
     // Create x and y scale
     this.xScale = d3
