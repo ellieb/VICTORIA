@@ -50,6 +50,7 @@
 /* global combineDICOMDoseData */
 /* global processPhantomData */
 /* global processDoseData */
+/* global processCsvData */
 /* global processDICOMSlice */
 
 // import {
@@ -286,7 +287,7 @@ function handleFiles (files) {
       const dicomDensityList = files.filter(file => (file.ext === 'dcm' || file.ext === 'DCM') && file.data.type === 'CT Image Storage')
       const dicomDoseList = files.filter(file => (file.ext === 'dcm' || file.ext === 'DCM') && file.data.type === 'RT Dose Storage')
       const egsphantList = files.filter(file => file.ext === 'egsphant')
-      const doseList = files.filter(file => file.ext === '3ddose')
+      const doseList = files.filter(file => file.ext === '3ddose' || file.ext === 'csv')
       const structureSetList = files.filter(file => (file.ext === 'dcm' || file.ext === 'DCM') && file.data.type === 'RT Structure Set Storage')
 
       // If DICOM density files
@@ -371,7 +372,7 @@ function handleFiles (files) {
 function readFile (resolve, reject, file, fileNum, totalFiles) {
   const reader = new FileReader()
   const fileName = file.name
-  const ext = fileName.split('.').pop()
+  const ext = fileName.split('.').pop().toLowerCase()
 
   reader.addEventListener('loadstart', function () {
     console.log('File reading started')
@@ -407,8 +408,10 @@ function readFile (resolve, reject, file, fileNum, totalFiles) {
     } else if (ext === '3ddose') {
       const resultSplit = result.split('\n')
       data = processDoseData(resultSplit)
-    } else if (ext === 'dcm' || ext === 'DCM') {
+    } else if (ext === 'dcm') {
       data = processDICOMSlice(result)
+    } else if (ext === 'csv') {
+      data = processCsvData(result)
     } else {
       console.log('Unknown file extension')
       reject('Unknown file extension')

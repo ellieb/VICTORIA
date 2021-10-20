@@ -29,6 +29,7 @@
 */
 
 // definitions for StandardJS formatter
+/* global d3 */
 
 /**
  * Extract data from .egsphant files.
@@ -233,4 +234,88 @@ var processDoseData = function (data) { // eslint-disable-line no-unused-vars
   }
 }
 
-// export { processDoseData, processPhantomData }
+/**
+ * Extract data from .csv files.
+ *
+ * @param {Object} data The .csv file read as text.
+ * @returns {Object}
+ */
+var processCsvData = function (data) { // eslint-disable-line no-unused-vars
+  // The current line of the text file being read
+
+  const DIMS = ['x', 'y', 'z']
+  const dataSplit = data.trim('').split(/\r?\n/g)
+
+  let curr = 0
+  const groupList = []
+
+  while (dataSplit[curr][0] === '#') {
+    const regex = /^# (?<dimension>X|Y|Z) in (?<bins>\d+) bins of (?<voxSize>\d+(\.\d*)?)/i
+    const found = dataSplit[curr++].match(regex)
+    if (found && found.groups) {
+      groupList.push(found.groups)
+    }
+  }
+
+  const groupObj = groupList.reduce(function (acc, obj) { acc[obj.dimension.toLowerCase()] = { bins: obj.bins, voxSize: obj.voxSize }; return acc }, {})
+
+  // Get number of x, y, and z voxels
+  const [numVoxX, numVoxY, numVoxZ] = DIMS.map((dim) => parseInt(groupObj[dim].bins))
+
+  // Get x, y, and z arrays
+  const [xArr, yArr, zArr] = DIMS.map((dim) => {
+    const numVox = groupObj[dim].bins
+    const voxSize = groupObj[dim].voxSize
+    return d3.range(-voxSize * numVox / 2, voxSize * (numVox / 2 + 1), voxSize)
+  })
+
+  // Get the dose and error arrays
+  const dose = new Array(numVoxX * numVoxY * numVoxZ)
+  const error = new Array(numVoxX * numVoxY * numVoxZ)
+  let address, idx
+
+  const parsedData = dataSplit.slice(curr).map((line) => parseFloat(line.split(',')[3].trim()))
+
+  for (let x = 0; x < numVoxX; x++) {
+    for (let y = 0; y < numVoxY; y++) {
+      for (let z = 0; z < numVoxZ; z++) {
+        // First index changing fastest, last index changing slowest
+        idx = x + (y * numVoxX) + (z * numVoxX * numVoxY)
+        address = z + (y * numVoxZ) + (x * numVoxY * numVoxZ)
+        dose[idx] = parsedData[address]
+      }
+    }
+  }
+
+  // Calculate maximum dose
+  let maxDose = 0
+  dose.forEach((elem, i) => {
+    if (dose[i] > maxDose) {
+      maxDose = dose[i]
+    }
+  })
+
+  return {
+    voxelNumber: {
+      x: numVoxX, // The number of x voxels
+      y: numVoxY, // The number of y voxels
+      z: numVoxZ // The number of z voxels
+    },
+    voxelArr: {
+      x: xArr, // The dimensions of x voxels
+      y: yArr, // The dimensions of x voxels
+      z: zArr // The dimensions of x voxels
+    },
+    voxelSize: {
+      x: xArr[1] - xArr[0],
+      y: yArr[1] - yArr[0],
+      z: zArr[1] - zArr[0]
+    },
+    dose: dose, // The flattened dose matrix
+    error: error, // The flattened error matrix
+    maxDose: maxDose, // The maximum dose value
+    units: 'RELATIVE' // The dose units
+  }
+}
+
+// export { processDoseData, processPhantomData, processCsvData }
