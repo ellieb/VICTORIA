@@ -250,7 +250,7 @@ var processCsvData = function (data) { // eslint-disable-line no-unused-vars
   const groupList = []
 
   while (dataSplit[curr][0] === '#') {
-    const regex = /^# (?<dimension>X|Y|Z) in (?<bins>\d+) bins of (?<voxSize>\d+(\.\d*)?)/i
+    const regex = /^#\s*(?<dimension>X|Y|Z)\D*\s*(?<bins>\d+)\s*(bin|bins)\D*\s*(?<voxSize>\d+(\.\d*)?)/i
     const found = dataSplit[curr++].match(regex)
     if (found && found.groups) {
       groupList.push(found.groups)
