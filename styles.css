@@ -262,14 +262,15 @@ div.backdrop {
 div.modal {
   position: fixed;
   top: 20vh;
-  left: 15%;
-  width: 70%;
+  left: 50%;
+  transform: translate(-50%, 0);
   background-color: white;
-  padding: 1rem;
+  padding: 1rem 5rem 2rem 2rem;
   border-radius: 14px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   z-index: 30;
   animation: slide-down 300ms ease-out forwards;
+  font-size: 22px;
 }
 
 div.modal-actions {
@@ -280,7 +281,6 @@ div.modal-actions {
   font: inherit;
   cursor: pointer;
   padding: 0.5rem 3rem;
-  margin-left: 0.5rem;
 }
 
 @keyframes slide-down {

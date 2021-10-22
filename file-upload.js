@@ -425,7 +425,7 @@ function readFile (resolve, reject, file, fileNum, totalFiles) {
 
       console.log('Finished processing data')
     } catch (error) {
-      reject('The file could unfortunately not be parsed.')
+      reject('The file could not be parsed.')
     }
 
     return true
