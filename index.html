@@ -42,6 +42,14 @@
     <script async src="https://cdn.jsdelivr.net/npm/dicom-parser@1.8.7/dist/dicomParser.min.js"></script>
   </head>
   <body>
+    <div class="backdrop" style="display: none"></div>
+    <div class="modal" style="display: none">
+      <h1 id="error-message">
+      </h1>
+      <div class="modal-actions">
+        <button type="button" class="btn-close">Close</button>
+      </div>
+    </div>
     <div class="header">
       <h1>UVic Dose Dig</h1>
       <img src="./images/logo.jpg" alt="XCITE Lab logo" />
@@ -99,5 +107,6 @@
     <script type="text/javascript" src="./checkbox-button-helper.js"></script>
     <script type="text/javascript" src="./dicom.js"></script>
     <script type="text/javascript" src="./file-upload.js"></script>
+    <script type="text/javascript" src="./modal.js"></script>
   </body>
 </html>

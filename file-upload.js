@@ -52,6 +52,7 @@
 /* global processDoseData */
 /* global processCsvData */
 /* global processDICOMSlice */
+/* global showModal */
 
 // import {
 //   DOSE_PROFILE_DIMENSIONS, LEGEND_DIMENSIONS, MAIN_VIEWER_DIMENSIONS,
@@ -63,6 +64,7 @@
 // import { DoseVolume } from './volumes/dose-volume.js'
 // import { StructureSetVolume } from './volumes/structure-set-volume.js'
 // import { combineDICOMDensityData, combineDICOMDoseData, processDICOMSlice } from './dicom.js'
+// import { showModal } from './modal.js
 
 const dropArea = d3.select('#drop-area')
 const progressBar = d3.select('#progress-bar')
@@ -280,9 +282,8 @@ function handleFiles (files) {
     promises.push(filePromise)
   })
 
-  Promise.allSettled(promises)
-    .then((results) => results.filter(result => result.status === 'fulfilled')) // Filter out rejected files
-    .then((results) => results.map(result => result.value)) // Replace the promise with value
+  // Will only continue if all promises resolve
+  Promise.all(promises)
     .then(files => {
       const dicomDensityList = files.filter(file => (file.ext === 'dcm' || file.ext === 'DCM') && file.data.type === 'CT Image Storage')
       const dicomDoseList = files.filter(file => (file.ext === 'dcm' || file.ext === 'DCM') && file.data.type === 'RT Dose Storage')
@@ -360,6 +361,9 @@ function handleFiles (files) {
         }
       })
     })
+    .catch((error) => {
+      showModal(error)
+    })
 }
 
 /**
@@ -391,7 +395,7 @@ function readFile (resolve, reject, file, fileNum, totalFiles) {
   })
 
   reader.addEventListener('error', function () {
-    alert('Error: Failed to read file')
+    alert('Failed to read file')
     return true
   })
 
@@ -402,25 +406,28 @@ function readFile (resolve, reject, file, fileNum, totalFiles) {
     const result = e.target.result
     let data
 
-    if (ext === 'egsphant') {
-      const resultSplit = result.split('\n')
-      data = processPhantomData(resultSplit)
-    } else if (ext === '3ddose') {
-      const resultSplit = result.split('\n')
-      data = processDoseData(resultSplit)
-    } else if (ext === 'dcm') {
-      data = processDICOMSlice(result)
-    } else if (ext === 'csv') {
-      data = processCsvData(result)
-    } else {
-      console.log('Unknown file extension')
-      reject('Unknown file extension')
-      return true
+    try {
+      if (ext === 'egsphant') {
+        const resultSplit = result.split('\n')
+        data = processPhantomData(resultSplit)
+      } else if (ext === '3ddose') {
+        const resultSplit = result.split('\n')
+        data = processDoseData(resultSplit)
+      } else if (ext === 'dcm') {
+        data = processDICOMSlice(result)
+      } else if (ext === 'csv') {
+        data = processCsvData(result)
+      } else {
+        reject('Unknown file extension')
+      }
+
+      resolve({ data: data, ext: ext, fileName: fileName })
+
+      console.log('Finished processing data')
+    } catch (error) {
+      reject('The file could unfortunately not be parsed.')
     }
 
-    resolve({ data: data, ext: ext, fileName: fileName })
-
-    console.log('Finished processing data')
     return true
   })
 
