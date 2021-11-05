@@ -108,8 +108,6 @@ function combineDICOMDensityData (DICOMList) { // eslint-disable-line no-unused-
       z: zVoxSize // The voxel size in the z direction
     },
     density: density, // The flattened density matrix
-    // materialList: materialList, // The materials in the phantom
-    // material: material, // The flattened material matrix
     maxDensity: 3071, // The maximum density value 3071 HU
     minDensity: -1024, // The minimum density value -1024 HU
     studyInstanceUID: data.studyInstanceUID // The study instance identifier

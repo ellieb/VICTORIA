@@ -260,16 +260,8 @@ class DensityVolume extends Volume { // eslint-disable-line no-unused-vars
   getMaterialAtVoxelCoords (voxelCoords) {
     if (this.data.material) {
       const [x, y, z] = voxelCoords
-      const address =
-        z * (this.data.voxelNumber.x * this.data.voxelNumber.y) +
-        y * this.data.voxelNumber.x +
-        x
-
-      const divisor = this.data.voxelNumber.x
-      const materialNumber = parseInt(
-        this.data.material[Math.floor(address / divisor)][address % divisor]
-      )
-      return this.data.materialList[materialNumber - 1]
+      const materialSymbol = this.data.material[y + this.data.voxelNumber.y * z][x]
+      return this.data.materialDict[materialSymbol]
     }
     return ''
   }

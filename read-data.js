@@ -52,6 +52,12 @@ var processPhantomData = function (data) { // eslint-disable-line no-unused-vars
   // Get number and type of materials
   const numMaterials = parseInt(data[curr++])
   const materialList = data.slice(curr, numMaterials + curr).map(mat => mat.trim())
+  const materialDict = { 0: 'VACUUM' }
+  const toSymbol = (i) => String.fromCharCode(((i + 16) % 95) + 32)
+  materialList.forEach((materialName, i) => {
+    materialDict[toSymbol(i + 1)] = materialName
+  })
+
   curr += numMaterials
   curr += (data[curr].trim().split(/ +/).length === numMaterials) ? 1 : numMaterials
 
@@ -127,7 +133,7 @@ var processPhantomData = function (data) { // eslint-disable-line no-unused-vars
       z: zArr[1] - zArr[0]
     },
     density: density, // The flattened density matrix
-    materialList: materialList, // The materials in the phantom
+    materialDict: materialDict, // The materials in the phantom
     material: material, // The flattened material matrix
     minDensity: minDensity, // The minimum density value
     maxDensity: maxDensity // The maximum density value
