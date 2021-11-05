@@ -1000,7 +1000,7 @@ class VolumeViewer { // eslint-disable-line no-unused-vars
       const voxelCoords = coordsToVoxel(
         d.plotCoords,
         d.panel.axis,
-        d.panel.densitySliceNum || d.panel.doseSliceNum,
+        d.panel.densitySliceNum !== null ? d.panel.densitySliceNum : d.panel.doseSliceNum,
         d.panel.volume,
         d.panel.zoomTransform
       )

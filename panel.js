@@ -281,7 +281,7 @@ class Panel { // eslint-disable-line no-unused-vars
   coordsToWorld (coords) {
     const volume = this.densityVol || this.doseVol
     const axis = this.axis
-    const sliceNum = this.densitySliceNum || this.doseSliceNum
+    const sliceNum = this.densitySliceNum !== null ? this.densitySliceNum : this.doseSliceNum
     const transform = this.zoomTransform
 
     // Invert transformation if applicable then invert scale to get world coordinate

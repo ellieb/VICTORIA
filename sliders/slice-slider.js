@@ -70,7 +70,7 @@ var initializeSliceSlider = ( // eslint-disable-line no-unused-vars
       const voxelCoords = coordsToVoxel(
         plotCoords,
         currPanel.axis,
-        currPanel.densitySliceNum || currPanel.doseSliceNum,
+        currPanel.densitySliceNum !== null ? currPanel.densitySliceNum : currPanel.doseSliceNum,
         currPanel.volume,
         currPanel.zoomTransform
       )
