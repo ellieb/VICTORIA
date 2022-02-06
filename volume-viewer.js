@@ -1039,7 +1039,7 @@ class VolumeViewer { // eslint-disable-line no-unused-vars
 
           panel.updateMarker(coords, false)
           volumeViewer.updateSlice(panel.axis, sliceNum)
-          panel.updateSlider(sliceNum)
+          panel.updateSlider(sliceNum + 1)
         }
       })
     })
