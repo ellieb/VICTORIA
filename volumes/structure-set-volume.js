@@ -132,36 +132,48 @@ class StructureSetVolume extends Volume { // eslint-disable-line no-unused-vars
         // Increments for z array is the space between the slices
         const increments = { x: 0.2, y: 0.2, z: (rangeVals.z[1] - rangeVals.z[0]) / contourData.length }
         const voxelArr = {}
-        Object.entries(rangeVals).forEach(([dim, range]) => {
-          const divider = 1 / increments[dim]
-          const min = Math.floor(range[0] * divider) / divider
-          const max = Math.ceil(range[1] * divider) / divider
-          const items = Math.round((max - min) / increments[dim])
-          voxelArr[dim] = [...Array(items + 1)].map((x, y) => min + increments[dim] * y)
-        })
-        // Replace the z voxel array with the actual z values in the contour data
-        voxelArr.z = contourData.map((e) => e.z)
 
-        // Build the voxel information for the ROI array
-        const voxelNumber = {}
-        const scales = {}
-        Object.entries(voxelArr).map(([dim, arr]) => {
-          voxelNumber[dim] = arr.length
-          scales[dim] = d3.scaleQuantize().domain([arr[0] - increments[dim] / 2, arr[arr.length - 1] + increments[dim] / 2]).range(d3.range(0, arr.length, 1))
-        })
+        try {
+          Object.entries(rangeVals).forEach(([dim, range]) => {
+            if (range.length === 2) {
+              const divider = 1 / increments[dim]
+              const min = Math.floor(range[0] * divider) / divider
+              const max = Math.ceil(range[1] * divider) / divider
+              const items = Math.round((max - min) / increments[dim])
+              voxelArr[dim] = [...Array(items + 1)].map((x, y) => min + increments[dim] * y)
+            } else {
+              voxelArr[dim] = range
+            }
+          })
 
-        // Build the ROI array
-        var ROIArray = this.makeROIArray(contourData, voxelNumber, voxelArr, scales)
+          // Replace the z voxel array with the actual z values in the contour data
+          voxelArr.z = contourData.map((e) => e.z)
 
-        ROIOutlines.push({
-          label: ROI.ROIName || ROI.ROIObservationLabel,
-          colour: 'rgb(' + ROI.ROIDisplayColor.replaceAll('\\', ', ') + ')',
-          // contourGeometricType: contourGeometricType,
-          voxelNumber: voxelNumber,
-          scales: scales,
-          ROIArray: ROIArray,
-          voxelArr: voxelArr
-        })
+          // Build the voxel information for the ROI array
+          const voxelNumber = {}
+          const scales = {}
+          Object.entries(voxelArr).map(([dim, arr]) => {
+            voxelNumber[dim] = arr.length
+            const domain = arr.length === 1 ? arr : [arr[0] - increments[dim] / 2, arr[arr.length - 1] + increments[dim] / 2]
+            scales[dim] = d3.scaleQuantize().domain(domain).range(d3.range(0, arr.length, 1))
+          })
+
+          // Build the ROI array
+          var ROIArray = this.makeROIArray(contourData, voxelNumber, voxelArr, scales)
+
+          // TODO: Handle point data
+          ROIOutlines.push({
+            label: ROI.ROIName || ROI.ROIObservationLabel,
+            colour: 'rgb(' + ROI.ROIDisplayColor.replaceAll('\\', ', ') + ')',
+            // contourGeometricType: contourGeometricType,
+            voxelNumber: voxelNumber,
+            scales: scales,
+            ROIArray: ROIArray,
+            voxelArr: voxelArr
+          })
+        } catch (e) {
+          console.log(e)
+        }
       }
     }
     return ROIOutlines
