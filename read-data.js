@@ -81,22 +81,27 @@ var processPhantomData = function (data) { // eslint-disable-line no-unused-vars
 
   curr += 3
 
+  // Some files have a space here, others do not, so skip line if it is empty
+  if (data[curr].trim().length === 0) {
+    curr++
+  }
+
   // Read the material data
   const material = data
     .slice(
       curr,
-      parseInt(curr) + parseInt(numVoxY) * parseInt(numVoxZ) + parseInt(numVoxZ)
+      parseInt(curr) + parseInt(numVoxY) * parseInt(numVoxZ) + parseInt(numVoxZ) - 1
     )
     .map((subArr) => subArr.trim())
     .filter((subArr) => subArr.length > 0)
 
-  curr += numVoxY * numVoxZ + numVoxZ + 1
+  curr += numVoxY * numVoxZ + numVoxZ
 
   // Read the density data
   const lines = data
     .slice(
       curr,
-      parseInt(curr) + parseInt(numVoxY) * parseInt(numVoxZ) + parseInt(numVoxZ)
+      parseInt(curr) + parseInt(numVoxY) * parseInt(numVoxZ) + parseInt(numVoxZ) - 1
     )
     .map((subArr) => subArr.trim())
     .filter((subArr) => subArr.length > 0)
