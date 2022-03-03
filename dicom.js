@@ -183,6 +183,8 @@ const UIDs = {
   '1.2.840.10008.5.1.4.1.1.2': 'CT Image Storage',
   '1.2.840.10008.5.1.4.1.1.481.2': 'RT Dose Storage',
   '1.2.840.10008.5.1.4.1.1.481.3': 'RT Structure Set Storage'
+  // TODO: Add RT Plan Storage reading ability
+  // '1.2.840.10008.5.1.4.1.1.481.5':  'RT Plan Storage'
 }
 
 var isStringVr = (vr) => !(

@@ -122,7 +122,7 @@ class StructureSetVolume extends Volume { // eslint-disable-line no-unused-vars
           if (prevZ === undefined || prevZ !== z) {
             contourData.push({ z: z, vals: [sliceContourData] })
             prevZ = z
-          } else {
+          } else if (contourData.length > 0) {
             contourData[contourData.length - 1].vals.push(sliceContourData)
           }
           // contourGeometricType.add(sequence.ContourGeometricType)
