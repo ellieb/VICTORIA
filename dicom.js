@@ -183,8 +183,6 @@ const UIDs = {
   '1.2.840.10008.5.1.4.1.1.2': 'CT Image Storage',
   '1.2.840.10008.5.1.4.1.1.481.2': 'RT Dose Storage',
   '1.2.840.10008.5.1.4.1.1.481.3': 'RT Structure Set Storage'
-  // TODO: Add RT Plan Storage reading ability
-  // '1.2.840.10008.5.1.4.1.1.481.5':  'RT Plan Storage'
 }
 
 var isStringVr = (vr) => !(
@@ -280,116 +278,117 @@ function dumpDataSet (dataSet, values) {
 function processDICOMSlice (arrayBuffer) { // eslint-disable-line no-unused-vars
   const byteArray = new Uint8Array(arrayBuffer)
 
-  try {
-    const dataSet = dicomParser.parseDicom(byteArray) //, { untilTag: 'x7fe00010' })
-    const dicomType = UIDs[dataSet.string('x00020002')]
+  const dataSet = dicomParser.parseDicom(byteArray) //, { untilTag: 'x7fe00010' })
+  const dicomType = UIDs[dataSet.string('x00020002')]
 
-    const propertyValues = {}
-    dumpDataSet(dataSet, propertyValues)
+  if (typeof dicomType === 'undefined') {
+    const acceptedFiles = Object.values(UIDs)
+    const acceptedFilesString = acceptedFiles.slice(0, -1).join(', ') + ' and ' + acceptedFiles.slice(-1)
+    throw new Error(`Unknown DICOM file type. Can only accept ${acceptedFilesString}.`)
+  }
 
-    if (dicomType === 'CT Image Storage' || dicomType === 'RT Dose Storage') {
+  const propertyValues = {}
+  dumpDataSet(dataSet, propertyValues)
+
+  if (dicomType === 'CT Image Storage' || dicomType === 'RT Dose Storage') {
     // Map the values gathered from the DICOM file to the slice info
-      const nRows = parseInt(propertyValues.Rows)
-      const nCols = parseInt(propertyValues.Columns)
+    const nRows = parseInt(propertyValues.Rows)
+    const nCols = parseInt(propertyValues.Columns)
 
-      const [Sx, Sy, Sz] = propertyValues.ImagePositionPatient.split('\\').map((v) => {
-        return Number(v) / 10.0
-      })
-      const XY = propertyValues.ImageOrientationPatient.split('\\').map((v) => {
-        return Number(v)
-      })
-      const [xVoxSize, yVoxSize] = propertyValues.PixelSpacing.split('\\').map((v) => {
-        return Number(v) / 10.0
-      })
+    const [Sx, Sy, Sz] = propertyValues.ImagePositionPatient.split('\\').map((v) => {
+      return Number(v) / 10.0
+    })
+    const XY = propertyValues.ImageOrientationPatient.split('\\').map((v) => {
+      return Number(v)
+    })
+    const [xVoxSize, yVoxSize] = propertyValues.PixelSpacing.split('\\').map((v) => {
+      return Number(v) / 10.0
+    })
 
-      // var Px = (i, j) => Xx * xVoxSize * i + Yx * yVoxSize * j + Sx
-      // var Py = (i, j) => Xy * xVoxSize * i + Yy * yVoxSize * j + Sy
-      // var Pz = (i, j) => Xz * xVoxSize * i + Yz * yVoxSize * j + Sz
+    // var Px = (i, j) => Xx * xVoxSize * i + Yx * yVoxSize * j + Sx
+    // var Py = (i, j) => Xy * xVoxSize * i + Yy * yVoxSize * j + Sy
+    // var Pz = (i, j) => Xz * xVoxSize * i + Yz * yVoxSize * j + Sz
 
-      var xArr = [...Array(nCols + 1)].map((e, i) => (XY[0] * xVoxSize * (i - 0.5) + Sx))
-      var yArr = [...Array(nRows + 1)].map((e, j) => (XY[4] * yVoxSize * (j - 0.5) + Sy))
+    var xArr = [...Array(nCols + 1)].map((e, i) => (XY[0] * xVoxSize * (i - 0.5) + Sx))
+    var yArr = [...Array(nRows + 1)].map((e, j) => (XY[4] * yVoxSize * (j - 0.5) + Sy))
 
-      var DICOMSlice = {
-        type: dicomType,
-        sliceNum: parseInt(propertyValues.InstanceNumber),
-        voxelNumber: {
-          x: nCols, // The number of x voxels
-          y: nRows // The number of y voxels
-        },
-        voxelArr: {
-          x: xArr, // The dimensions of x voxels (length === voxelNumber.x + 1)
-          y: yArr // The dimensions of y voxels
-        },
-        voxelSize: {
-          x: xVoxSize, // The voxel size in the x direction
-          y: yVoxSize // The voxel size in the y direction
-        },
-        zPos: Sz,
-        studyInstanceUID: propertyValues.StudyInstanceUID
-      }
+    var DICOMSlice = {
+      type: dicomType,
+      sliceNum: parseInt(propertyValues.InstanceNumber),
+      voxelNumber: {
+        x: nCols, // The number of x voxels
+        y: nRows // The number of y voxels
+      },
+      voxelArr: {
+        x: xArr, // The dimensions of x voxels (length === voxelNumber.x + 1)
+        y: yArr // The dimensions of y voxels
+      },
+      voxelSize: {
+        x: xVoxSize, // The voxel size in the x direction
+        y: yVoxSize // The voxel size in the y direction
+      },
+      zPos: Sz,
+      studyInstanceUID: propertyValues.StudyInstanceUID
+    }
 
-      // If there are multiple frames
-      if (propertyValues.FrameIncrementPointer !== undefined) {
+    // If there are multiple frames
+    if (propertyValues.FrameIncrementPointer !== undefined) {
       // Position relative to Image Position (patient)
-        const gridFrames = dataSet.string(propertyValues.FrameIncrementPointer).split('\\').map((v) => {
-          return Number(v) / 10.0
-        })
-        const nSlices = parseInt(propertyValues.NumberOfFrames)
-        const zVoxSize = Math.abs(gridFrames[1] - gridFrames[0])
-        const zArr = gridFrames.map((frameOffset) => (Sz + frameOffset + zVoxSize * 0.5))
-        zArr.unshift(Sz - zVoxSize * 0.5)
+      const gridFrames = dataSet.string(propertyValues.FrameIncrementPointer).split('\\').map((v) => {
+        return Number(v) / 10.0
+      })
+      const nSlices = parseInt(propertyValues.NumberOfFrames)
+      const zVoxSize = Math.abs(gridFrames[1] - gridFrames[0])
+      const zArr = gridFrames.map((frameOffset) => (Sz + frameOffset + zVoxSize * 0.5))
+      zArr.unshift(Sz - zVoxSize * 0.5)
 
-        DICOMSlice.voxelNumber.z = nSlices
-        DICOMSlice.voxelArr.z = zArr
-        DICOMSlice.voxelSize.z = zVoxSize
+      DICOMSlice.voxelNumber.z = nSlices
+      DICOMSlice.voxelArr.z = zArr
+      DICOMSlice.voxelSize.z = zVoxSize
+    }
+
+    if (dicomType === 'RT Dose Storage') {
+      const scalingFactor = parseFloat(propertyValues.DoseGridScaling)
+      const pixelDataScaled = new Float32Array(propertyValues.PixelData.length)
+
+      for (let i = 0; i < propertyValues.PixelData.length; i++) {
+        pixelDataScaled[i] = propertyValues.PixelData[i] * scalingFactor
       }
 
-      if (dicomType === 'RT Dose Storage') {
-        const scalingFactor = parseFloat(propertyValues.DoseGridScaling)
-        const pixelDataScaled = new Float32Array(propertyValues.PixelData.length)
-
-        for (let i = 0; i < propertyValues.PixelData.length; i++) {
-          pixelDataScaled[i] = propertyValues.PixelData[i] * scalingFactor
-        }
-
-        DICOMSlice.dose = pixelDataScaled
-        DICOMSlice.units = propertyValues.DoseUnits
-      } else if (dicomType === 'CT Image Storage') {
+      DICOMSlice.dose = pixelDataScaled
+      DICOMSlice.units = propertyValues.DoseUnits
+    } else if (dicomType === 'CT Image Storage') {
       // TODO: materialList and material matrix
       // Rescale the density values
-        const m = parseFloat(propertyValues.RescaleSlope)
-        const b = parseFloat(propertyValues.RescaleIntercept)
-        const pixelDataScaled = new Float32Array(propertyValues.PixelData.length)
+      const m = parseFloat(propertyValues.RescaleSlope)
+      const b = parseFloat(propertyValues.RescaleIntercept)
+      const pixelDataScaled = new Float32Array(propertyValues.PixelData.length)
 
-        for (let i = 0; i < propertyValues.PixelData.length; i++) {
-          pixelDataScaled[i] = m * propertyValues.PixelData[i] + b
-        }
-        DICOMSlice.density = pixelDataScaled
+      for (let i = 0; i < propertyValues.PixelData.length; i++) {
+        pixelDataScaled[i] = m * propertyValues.PixelData[i] + b
       }
-      return DICOMSlice
-    } else if (dicomType === 'RT Structure Set Storage') {
-      const numROIs = propertyValues.ROIContourSequence.length
-      const ROIs = new Array(numROIs)
-      for (let i = 0; i < numROIs; i++) {
-        const contourSequence = propertyValues.ROIContourSequence[i]
-
-        const ROINum = parseInt(contourSequence.ReferencedROINumber)
-
-        const structureSetSequence = propertyValues.StructureSetROISequence.find((item) => {
-          if (parseInt(item.ROINumber) === ROINum) return true
-        })
-
-        const RTROIObservationsSequence = propertyValues.RTROIObservationsSequence.find((item) => {
-          if (parseInt(item.ReferencedROINumber) === ROINum) return true
-        })
-
-        ROIs[i] = { type: dicomType, ...contourSequence, ...structureSetSequence, ...RTROIObservationsSequence }
-      }
-      return { type: dicomType, ROIs: ROIs, studyInstanceUID: propertyValues.StudyInstanceUID }
+      DICOMSlice.density = pixelDataScaled
     }
-  } catch (ex) {
-    console.log('Error parsing byte stream', ex)
-    return true
+    return DICOMSlice
+  } else if (dicomType === 'RT Structure Set Storage') {
+    const numROIs = propertyValues.ROIContourSequence.length
+    const ROIs = new Array(numROIs)
+    for (let i = 0; i < numROIs; i++) {
+      const contourSequence = propertyValues.ROIContourSequence[i]
+
+      const ROINum = parseInt(contourSequence.ReferencedROINumber)
+
+      const structureSetSequence = propertyValues.StructureSetROISequence.find((item) => {
+        if (parseInt(item.ROINumber) === ROINum) return true
+      })
+
+      const RTROIObservationsSequence = propertyValues.RTROIObservationsSequence.find((item) => {
+        if (parseInt(item.ReferencedROINumber) === ROINum) return true
+      })
+
+      ROIs[i] = { type: dicomType, ...contourSequence, ...structureSetSequence, ...RTROIObservationsSequence }
+    }
+    return { type: dicomType, ROIs: ROIs, studyInstanceUID: propertyValues.StudyInstanceUID }
   }
 }
 
