@@ -219,7 +219,7 @@ d3.select('#test-files').on('click', function () {
     if (i !== 0) request.responseType = 'arraybuffer'
 
     // Get each of the test files
-    request.open('GET', './test-files/' + testFile, true)
+    request.open('GET', '../test-files/' + testFile, true)
 
     request.onreadystatechange = function () {
       if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
