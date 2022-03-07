@@ -89,7 +89,7 @@ class DensityVolume extends Volume { // eslint-disable-line no-unused-vars
       // If web workers are supported, cache images in the background
       try {
         axes.forEach((axis, i) => {
-          var cacheWorker = new Worker('cache-worker.mjs')
+          var cacheWorker = new Worker('js/cache-worker.mjs')
 
           const e = {
             axis: axis,
