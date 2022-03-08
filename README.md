@@ -1,7 +1,7 @@
-# Dose Viewer
+# VICTORIA
 
-Dose viewer is a (WIP) web-based visualization tool for EGSnrc phantom and dose
-files. To use, either upload .3ddose and .egsphant files or use the test files
+VICTORIA is a web-based visualization tool for DICOM, EGSnrc phantom, and EGSnrc dose
+files. To use, either upload .3ddose, .egsphant, or DICOM files; or use the test files
 available. If two or more dose files are uploaded, they can be compared in the
 viewer. Dose contours can be added with the input box in the dose legend.
 Contours can be toggled on and off by clicking the corresponding colour block in
@@ -15,7 +15,7 @@ the plot to investigate.
 To run this webpage locally:
 
 1.  Clone the repo
-2.  Using the command line, `cd` into the dose-viewer folder
+2.  Using the command line, `cd` into the VICTORIA folder
 3.  If you have Python 3, start a local server using the command
 
          python -m http.server
