@@ -1,0 +1,23 @@
+{
+  "name": "victoria",
+  "version": "1.0.0",
+  "description": "A web-based medical image viewer",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ellieb/VICTORIA.git"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/ellieb/VICTORIA/issues"
+  },
+  "homepage": "https://github.com/ellieb/VICTORIA#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "standard": "^16.0.4"
+  }
+}
