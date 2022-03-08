@@ -153,8 +153,8 @@ class DoseVolumeHistogram { // eslint-disable-line no-unused-vars
       .attr('transform', transform.toString())
 
     // Create new scale objects based on event
-    var newXDoseScale = transform.rescaleX(this.xDoseScale)
-    var newYVolumeScale = transform.rescaleY(this.yVolumeScale)
+    const newXDoseScale = transform.rescaleX(this.xDoseScale)
+    const newYVolumeScale = transform.rescaleY(this.yVolumeScale)
 
     // Create and append x and y axes
     const xAxis = d3
@@ -200,8 +200,8 @@ class DoseVolumeHistogram { // eslint-disable-line no-unused-vars
     const maxDose = doseVol.data.maxDose * 100 // Max dose in cGy
     // Calculate the cumulative dose for each ROI
     this.data = ROIHistograms.map((histogram, idx) => {
-      var cumSum = 0
-      var cumulativeHistogram = histogram
+      let cumSum = 0
+      const cumulativeHistogram = histogram
         .reverse()
         .map((val) => {
           cumSum += val

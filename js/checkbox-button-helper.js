@@ -50,7 +50,7 @@
 /**
  * Enable the plot density checkbox for the dose profile plots.
  */
-var enableCheckboxForDensityPlot = () => { // eslint-disable-line no-unused-vars
+const enableCheckboxForDensityPlot = () => { // eslint-disable-line no-unused-vars
   const densityCheckbox = d3
     .select("input[name='density-profile-checkbox']")
     .node()
@@ -60,7 +60,7 @@ var enableCheckboxForDensityPlot = () => { // eslint-disable-line no-unused-vars
 /**
  * Enable a button.
  */
-var enableButton = (button) => { // eslint-disable-line no-unused-vars
+const enableButton = (button) => { // eslint-disable-line no-unused-vars
   if (button.node().disabled) { button.node().disabled = false }
 }
 
@@ -81,7 +81,7 @@ d3.select('#add-volume-viewer').on('click', function () {
 /**
  * Define the behaviour of selecting the show dose profile checkbox.
  */
-var defineShowProfileCheckboxBehaviour = function (volumeViewer, checkbox) { // eslint-disable-line no-unused-vars
+const defineShowProfileCheckboxBehaviour = function (volumeViewer, checkbox) { // eslint-disable-line no-unused-vars
   // Call all panels to show/hide crosshairs
   Object.values(volumeViewer.panels).forEach((panel) => {
     panel.updateCrosshairDisplay()
@@ -123,7 +123,7 @@ var defineShowProfileCheckboxBehaviour = function (volumeViewer, checkbox) { // 
 /**
  * Define the behaviour of selecting the show voxel information checkbox.
  */
-var defineShowMarkerCheckboxBehaviour = function (volumeViewer, checkbox) { // eslint-disable-line no-unused-vars
+const defineShowMarkerCheckboxBehaviour = function (volumeViewer, checkbox) { // eslint-disable-line no-unused-vars
   // Call all panels to show/hide circle marker
   Object.values(volumeViewer.panels).forEach((panel) => {
     panel.updateCircleMarkerDisplay()
@@ -154,11 +154,11 @@ var defineShowMarkerCheckboxBehaviour = function (volumeViewer, checkbox) { // e
 /**
  * Define the behaviour of selecting the show ROI outlines checkbox.
  */
-var defineShowROICheckboxBehaviour = function (volumeViewer, checkbox) { // eslint-disable-line no-unused-vars
+const defineShowROICheckboxBehaviour = function (volumeViewer, checkbox) { // eslint-disable-line no-unused-vars
   if (checkbox.checked) {
     // Given the voxel array, return the range of values for each dimension
     const getRange = (voxArr) => {
-      var range = {}
+      const range = {}
       Object.entries(voxArr).forEach(([dim, vals]) => {
         range[dim] = [vals[0], vals[vals.length - 1]]
       })
@@ -190,7 +190,7 @@ var defineShowROICheckboxBehaviour = function (volumeViewer, checkbox) { // esli
 
     // Set volume viewer structure set to the set that overlaps with the current
     // files displayed
-    var structureSetVol
+    let structureSetVol
     for (let i = 0; i < structureSetVolumeList.length; i++) {
       structureSetVol = structureSetVolumeList[i]
       // Check if studyInstanceUID matches or areas overlap
@@ -230,7 +230,7 @@ var defineShowROICheckboxBehaviour = function (volumeViewer, checkbox) { // esli
 /**
  * Define the behaviour of selecting the show DVH checkbox.
  */
-var defineShowDVHCheckboxBehaviour = function (volumeViewer, checkbox) { // eslint-disable-line no-unused-vars
+const defineShowDVHCheckboxBehaviour = function (volumeViewer, checkbox) { // eslint-disable-line no-unused-vars
   if (checkbox.checked) {
     if (volumeViewer.structureSetVolume && volumeViewer.DVH && volumeViewer.doseVolume) {
       // Show DVH plot
@@ -255,7 +255,7 @@ var defineShowDVHCheckboxBehaviour = function (volumeViewer, checkbox) { // esli
 /**
  * Define the behaviour of selecting the normalize DICOM checkbox.
  */
-var defineNormalizeDoseCheckboxBehaviour = function (volumeViewer, checkbox) { // eslint-disable-line no-unused-vars
+const defineNormalizeDoseCheckboxBehaviour = function (volumeViewer, checkbox) { // eslint-disable-line no-unused-vars
   if (checkbox.checked) {
     // Enable the input boxes
     volumeViewer.doseNormValInput.select('input').attr('disabled', null)

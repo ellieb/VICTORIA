@@ -46,7 +46,7 @@
  * @param {DensityVolume} densityVol The density volume the sliders control.
  * @param {VolumeViewer} volumeViewer The volumeViewer to initialize the slider.
  */
-var initializeSliceSlider = ( // eslint-disable-line no-unused-vars
+const initializeSliceSlider = ( // eslint-disable-line no-unused-vars
   sliceParentDiv,
   axis,
   volumeViewer
@@ -55,7 +55,7 @@ var initializeSliceSlider = ( // eslint-disable-line no-unused-vars
   sliceParentDiv.selectAll('*').remove()
 
   // Make slice slider
-  var onSliceChangeCallback = (sliderVal) => {
+  const onSliceChangeCallback = (sliderVal) => {
     const currPanel = volumeViewer.panels[axis]
 
     // Update slice of current panel

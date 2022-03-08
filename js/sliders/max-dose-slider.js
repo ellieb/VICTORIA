@@ -43,7 +43,7 @@
  * @param {DoseVolume} doseVol The dose volume the sliders control.
  * @param {VolumeViewer} volumeViewer The volumeViewer to initialize the slider.
  */
-var initializeMaxDoseSlider = ( // eslint-disable-line no-unused-vars
+const initializeMaxDoseSlider = ( // eslint-disable-line no-unused-vars
   maxDoseParentDiv,
   doseVol,
   volumeViewer
@@ -52,7 +52,7 @@ var initializeMaxDoseSlider = ( // eslint-disable-line no-unused-vars
   maxDoseParentDiv.selectAll('*').remove()
 
   // Make max slider
-  var onMaxDoseChangeCallback = (sliderVal) =>
+  const onMaxDoseChangeCallback = (sliderVal) =>
     volumeViewer.setMaxDose(sliderVal)
 
   const doseSliderParams = {

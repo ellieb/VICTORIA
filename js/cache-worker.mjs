@@ -15,7 +15,7 @@ if (typeof importScripts === 'function') {
 
 function handleMessage (e) {
   // Process position to get centre voxel position rather than boundaries
-  var position = e.data.voxArr
+  let position = e.data.voxArr
   position = position.map((val, i) => {
     return val + (e.data.voxArr[i + 1] - val) / 2
   })
@@ -57,8 +57,8 @@ function getColourFunction (minVal, maxVal) {
  */
 function getDataArray (slice, colourFn) {
   // Create the image data
-  var imageData = new Uint8ClampedArray(slice.xVoxels * slice.yVoxels * 4)
-  var j = 0
+  const imageData = new Uint8ClampedArray(slice.xVoxels * slice.yVoxels * 4)
+  let j = 0
   for (let i = 0; i < slice.sliceData.length; i++) {
     const val = colourFn(slice.sliceData[i])
 

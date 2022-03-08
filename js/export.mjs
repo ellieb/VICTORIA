@@ -38,7 +38,7 @@
 
 const makeAndDownloadCsv = (data, name) => {
   // Create data blob
-  var csvBlob = new Blob([d3.csvFormat(data)], {
+  const csvBlob = new Blob([d3.csvFormat(data)], {
     type: 'text/csv;charset=utf-8;'
   })
 
@@ -54,16 +54,16 @@ const makeAndDownloadCsv = (data, name) => {
  * profile (x, y, z) of the volume viewer.
  */
 // TODO: If plot density is selected, download density information as well.
-var defineExportDoseProfileCSVButtonBehaviour = function (volumeViewer) { // eslint-disable-line no-unused-vars
+const defineExportDoseProfileCSVButtonBehaviour = function (volumeViewer) { // eslint-disable-line no-unused-vars
   const dims = ['Z', 'X', 'Y']
-  var doseProfiles = volumeViewer.doseProfileList.map((doseProfile) => doseProfile.data)
-  var n = Math.max(...doseProfiles.map((doseProfile) => doseProfile.length))
-  var doseProfileData = []
+  const doseProfiles = volumeViewer.doseProfileList.map((doseProfile) => doseProfile.data)
+  const n = Math.max(...doseProfiles.map((doseProfile) => doseProfile.length))
+  const doseProfileData = []
 
   // Iterate through each element of the X, Y, and Z dose profiles
   for (let i = 0; i < n; i++) {
-    var item
-    var data = {}
+    let item
+    const data = {}
     dims.forEach((dim, j) => {
       item = doseProfiles[j][i]
       data['position' + dim] = item ? item.position : null
@@ -75,7 +75,7 @@ var defineExportDoseProfileCSVButtonBehaviour = function (volumeViewer) { // esl
   }
 
   // Create csv name
-  var csvName =
+  const csvName =
         volumeViewer.id + '-dose-profile.csv'
 
   makeAndDownloadCsv(doseProfileData, csvName)
@@ -85,7 +85,7 @@ var defineExportDoseProfileCSVButtonBehaviour = function (volumeViewer) { // esl
  * Set up the export DVH to csv button behaviour. Downloads a csv for the DVH of
  * the volume viewer.
  */
-var defineExportDVHToCSVButtonBehaviour = function (volumeViewer) { // eslint-disable-line no-unused-vars
+const defineExportDVHToCSVButtonBehaviour = function (volumeViewer) { // eslint-disable-line no-unused-vars
   if (volumeViewer.DVH) {
     // Create csv name
     const csvName = volumeViewer.id + '-DVH.csv'
@@ -93,7 +93,7 @@ var defineExportDVHToCSVButtonBehaviour = function (volumeViewer) { // eslint-di
     // Put data in desired format before converting to csv
     const ROIs = volumeViewer.DVH.data
     const DVHData = ROIs[0].values.map((val, idx) => {
-      var obj = { dose: val.x }
+      const obj = { dose: val.x }
       ROIs.forEach((ROI) => {
         obj[ROI.key] = ROI.values[idx].y
       })
@@ -110,7 +110,7 @@ var defineExportDVHToCSVButtonBehaviour = function (volumeViewer) { // eslint-di
  * Part from http://bl.ocks.org/Rokotyan/0556f8facbaf344507cdc45dc3622177
  * https://github.com/aces/brainbrowser/blob/master/examples/volume-viewer-demo.js#L194-L248
  */
-var defineExportPNGButtonBehaviour = function (volumeViewer) { // eslint-disable-line no-unused-vars
+const defineExportPNGButtonBehaviour = function (volumeViewer) { // eslint-disable-line no-unused-vars
   const node = volumeViewer.volHolder.node()
 
   // TODO: Let user choose between png and svg
@@ -150,10 +150,10 @@ var defineExportPNGButtonBehaviour = function (volumeViewer) { // eslint-disable
       })
   } else if (format === 'svg') {
     // Convert the div to string
-    var imgString = getImgString(node)
+    const imgString = getImgString(node)
 
     // Convert img string to data URL
-    var imgSrc =
+    const imgSrc =
       'data:image/svg+xml;base64,' +
       btoa(unescape(encodeURIComponent(imgString)))
     downloadURI(imgSrc, imageName + '.png')
@@ -167,7 +167,7 @@ var defineExportPNGButtonBehaviour = function (volumeViewer) { // eslint-disable
  * @param {string} name The name given to the downloaded file.
  */
 function downloadURI (uri, name) {
-  var link = document.createElement('a')
+  const link = document.createElement('a')
 
   link.download = name
   link.href = uri
@@ -194,20 +194,21 @@ function getImgString (node) {
           styleSheet.href
         )
       }
+      return null
     })
     .filter(Boolean)
     .join('\n')
 
   // Append CSS to divNode
-  var styleElement = document.createElement('style')
+  const styleElement = document.createElement('style')
   styleElement.setAttribute('type', 'text/css')
   styleElement.innerHTML = allCSS
-  var refNode = node.hasChildNodes() ? node.children[0] : null
+  const refNode = node.hasChildNodes() ? node.children[0] : null
   node.insertBefore(styleElement, refNode)
 
   // Convert node to string
-  var serializer = new XMLSerializer()
-  var svgString = serializer.serializeToString(node)
+  const serializer = new XMLSerializer()
+  const svgString = serializer.serializeToString(node)
 
   return svgString
 }

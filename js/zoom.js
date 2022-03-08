@@ -46,7 +46,7 @@
  * @param {Array} args Any arguments to be passed into zoomCallback.
  * @returns {Object}
  */
-var getZoom = (width, height, zoomCallback, args) => // eslint-disable-line no-unused-vars
+const getZoom = (width, height, zoomCallback, args) => // eslint-disable-line no-unused-vars
   d3
     .zoom()
     .extent([
@@ -119,8 +119,8 @@ function zoomedAll (transform, panel) { // eslint-disable-line no-unused-vars
     .attr('transform', transform.toString())
 
   // Create new scale objects based on event
-  var newXScale = transform.rescaleX(volume.baseSlices[panel.axis].xScale)
-  var newYScale = transform.rescaleY(volume.baseSlices[panel.axis].yScale)
+  const newXScale = transform.rescaleX(volume.baseSlices[panel.axis].xScale)
+  const newYScale = transform.rescaleY(volume.baseSlices[panel.axis].yScale)
 
   // Update axes
   axisElements['axis-svg']

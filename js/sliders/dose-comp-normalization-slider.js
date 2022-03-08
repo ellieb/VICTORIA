@@ -43,7 +43,7 @@
  * @param {DoseComparisonVolume} doseVol The dose volume the sliders control.
  * @param {VolumeViewer} volumeViewer The volumeViewer to initialize the slider.
  */
-var initializeDoseCompNormSlider = ( // eslint-disable-line no-unused-vars
+const initializeDoseCompNormSlider = ( // eslint-disable-line no-unused-vars
   doseCompNormParentDiv,
   doseVol,
   volumeViewer
@@ -52,7 +52,7 @@ var initializeDoseCompNormSlider = ( // eslint-disable-line no-unused-vars
   doseCompNormParentDiv.selectAll('*').remove()
 
   // Make dose comparison normalization slider
-  var onMaxDoseChangeCallback = (sliderVal) => {
+  const onMaxDoseChangeCallback = (sliderVal) => {
     volumeViewer.setDoseComparisonNormFactor(sliderVal)
 
     // Update voxel info

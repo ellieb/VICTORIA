@@ -43,7 +43,7 @@
  * @param {DensityVolume} densityVol The density volume the sliders control.
  * @param {VolumeViewer} volumeViewer The volumeViewer to initialize the slider.
  */
-var initializeMinMaxDensitySlider = ( // eslint-disable-line no-unused-vars
+const initializeMinMaxDensitySlider = ( // eslint-disable-line no-unused-vars
   minParentDiv,
   maxParentDiv,
   densityVol,
@@ -54,13 +54,13 @@ var initializeMinMaxDensitySlider = ( // eslint-disable-line no-unused-vars
   maxParentDiv.selectAll('*').remove()
 
   // Make min slider
-  var minSliderChangeCallback = (sliderVal) => {
+  const minSliderChangeCallback = (sliderVal) => {
     if (parseFloat(sliderVal) > parseFloat(maxSlider.value)) {
       minSlider.setCurrentValue(maxSlider.value)
     }
   }
 
-  var minSliderReleaseCallback = (sliderVal) => {
+  const minSliderReleaseCallback = (sliderVal) => {
     volumeViewer.setMinDensityVar(sliderVal)
   }
 
@@ -82,13 +82,13 @@ var initializeMinMaxDensitySlider = ( // eslint-disable-line no-unused-vars
   )
 
   // Make max slider
-  var maxSliderChangeCallback = (sliderVal) => {
+  const maxSliderChangeCallback = (sliderVal) => {
     if (parseFloat(sliderVal) < parseFloat(minSlider.value)) {
       maxSlider.setCurrentValue(minSlider.value)
     }
   }
 
-  var maxSliderReleaseCallback = (sliderVal) => {
+  const maxSliderReleaseCallback = (sliderVal) => {
     volumeViewer.setMaxDensityVar(sliderVal)
   }
 

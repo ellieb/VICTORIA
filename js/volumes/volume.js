@@ -114,7 +114,7 @@ class Volume { // eslint-disable-line no-unused-vars
       const yVoxels = data.voxelNumber[dim2]
 
       // Get the length in cm of the x and y dimensions
-      var getLengthCm = (voxelArrDim) =>
+      const getLengthCm = (voxelArrDim) =>
         Math.abs(voxelArrDim[voxelArrDim.length - 1] - voxelArrDim[0])
       const [xLengthCm, yLengthCm] = [getLengthCm(x), getLengthCm(y)]
 

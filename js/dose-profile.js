@@ -141,8 +141,8 @@ class DoseProfile { // eslint-disable-line no-unused-vars
       .attr('transform', transform.toString())
 
     // Create new scale objects based on event
-    var newXScale = transform.rescaleX(this.xScale)
-    var newYDoseScale = transform.rescaleY(this.yDoseScale)
+    const newXScale = transform.rescaleX(this.xScale)
+    const newYDoseScale = transform.rescaleY(this.yDoseScale)
 
     // Update axes
     this.svg
@@ -163,7 +163,7 @@ class DoseProfile { // eslint-disable-line no-unused-vars
       )
 
     if (this.densityChecked()) {
-      var newYDensityScale = transform.rescaleY(this.yDensityScale)
+      const newYDensityScale = transform.rescaleY(this.yDensityScale)
       this.svg
         .select('.profile-y-density-axis')
         .call(

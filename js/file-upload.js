@@ -115,7 +115,7 @@ dropArea.on('dragleave drop', () => dropArea.classed('highlight', false))
  * @param {string} fileName The name of the .egsphant or DICOM file.
  * @param {Object} data     The data object created from the .egsphant or DICOM file.
  */
-var makeDensityVolume = (fileName, data, args) => {
+const makeDensityVolume = (fileName, data, args) => {
   const densityVol = new DensityVolume(
     fileName,
     MAIN_VIEWER_DIMENSIONS,
@@ -139,7 +139,7 @@ var makeDensityVolume = (fileName, data, args) => {
  * @param {string} fileName The name of the .3ddose file.
  * @param {Object} data     The data object created from the .3ddose file.
  */
-var makeDoseVolume = (fileName, data) => {
+const makeDoseVolume = (fileName, data) => {
   const doseVol = new DoseVolume(
     fileName,
     MAIN_VIEWER_DIMENSIONS,
@@ -159,7 +159,7 @@ var makeDoseVolume = (fileName, data) => {
  * @param {string} fileName The name of the DICOM file.
  * @param {Object} data     The data object created from the DICOM file.
  */
-var makeStructureSetVolume = (fileName, data) => {
+const makeStructureSetVolume = (fileName, data) => {
   const structureSetVol = new StructureSetVolume(
     fileName,
     MAIN_VIEWER_DIMENSIONS,
@@ -200,7 +200,7 @@ d3.select('#test-files').on('click', function () {
     'RD.2.16.840.1.114362.1.5.6.1.121121.6102256374.313565332.637.1446.dcm',
     'RS.2.16.840.1.114362.1.5.6.1.121121.6102256374.313565331.1073.1444.dcm']
 
-  var volViewer
+  let volViewer
   if (volumeViewerList.length === 0) {
     // Add a new volume viewer
     volViewer = new VolumeViewer(
@@ -227,7 +227,7 @@ d3.select('#test-files').on('click', function () {
         const ext = request.responseURL.split('.').pop()
         const fileName = request.responseURL.split('/').pop()
 
-        var response, data
+        let response, data
 
         if (i === 0) { // If the egsphant test file
           // Make density volume

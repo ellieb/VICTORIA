@@ -89,7 +89,7 @@ class DensityVolume extends Volume { // eslint-disable-line no-unused-vars
       // If web workers are supported, cache images in the background
       try {
         axes.forEach((axis, i) => {
-          var cacheWorker = new Worker('js/cache-worker.mjs')
+          const cacheWorker = new Worker('js/cache-worker.mjs')
 
           const e = {
             axis: axis,
@@ -155,7 +155,7 @@ class DensityVolume extends Volume { // eslint-disable-line no-unused-vars
       let val
 
       // Change colour mapping
-      for (var i = 0; i < imageArray.length; i += 4) {
+      for (let i = 0; i < imageArray.length; i += 4) {
         val = colourMap(this.colour.invert(imageArray[i]))
 
         imageArray[i] = val
@@ -186,7 +186,7 @@ class DensityVolume extends Volume { // eslint-disable-line no-unused-vars
     imgContext.restore()
 
     // TODO: Add event listener?
-    var image = new Image()
+    const image = new Image()
     image.src = canvas.toDataURL()
     return image
   }
@@ -199,7 +199,7 @@ class DensityVolume extends Volume { // eslint-disable-line no-unused-vars
    */
   getImageData (slice) {
     // Create new canvas element and set the dimensions
-    var canvas = document.createElement('canvas')
+    const canvas = document.createElement('canvas')
     const xVoxels = this.baseSlices[slice.axis].xVoxels
     const yVoxels = this.baseSlices[slice.axis].yVoxels
     canvas.width = xVoxels
@@ -209,12 +209,12 @@ class DensityVolume extends Volume { // eslint-disable-line no-unused-vars
     const context = canvas.getContext('2d')
 
     // Create the image data
-    var imageData = context.createImageData(xVoxels, yVoxels)
+    let imageData = context.createImageData(xVoxels, yVoxels)
 
     if (this.imageCache[slice.axis] !== undefined && this.imageCache[slice.axis][slice.sliceNum] !== undefined) {
       imageData.data.set(this.imageCache[slice.axis][slice.sliceNum])
     } else {
-      var j = 0
+      let j = 0
       for (let i = 0; i < slice.sliceData.length; i++) {
         const val = this.colour(slice.sliceData[i])
 

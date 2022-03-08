@@ -63,7 +63,7 @@ class DoseComparisonVolume extends Volume { // eslint-disable-line no-unused-var
      */
   addData (doseVol1, doseVol2) {
     // Check if dimensions are compatible
-    var compatibleDims = (voxArr1, voxArr2) => (
+    const compatibleDims = (voxArr1, voxArr2) => (
       Object.keys(voxArr1).every((axis) => {
         const len1 = voxArr1[axis].length
         const len2 = voxArr2[axis].length
@@ -80,9 +80,9 @@ class DoseComparisonVolume extends Volume { // eslint-disable-line no-unused-var
     )
 
     // Initialize dose difference and error arrays
-    var doseDiff = new Array(doseArr1.length)
+    let doseDiff = new Array(doseArr1.length)
     const error = new Array(doseArr1.length)
-    var interpolatedDose
+    let interpolatedDose
 
     // If both dose volumes have same dimensions
     if (compatibleDims(doseVol1.data.voxelArr, doseVol2.data.voxelArr)) {
@@ -96,8 +96,8 @@ class DoseComparisonVolume extends Volume { // eslint-disable-line no-unused-var
         error[i] = Math.sqrt(Math.pow(doseVol1.data.error[i], 2) * Math.pow(doseVol2.data.error[i], 2))
       }
     } else {
-      var grid = { x: null, y: null, z: null }
-      var voxelArr = { x: null, y: null, z: null }
+      const grid = { x: null, y: null, z: null }
+      const voxelArr = { x: null, y: null, z: null }
       Object.keys(doseVol1.data.voxelArr).forEach((dim) => { grid[dim] = getVoxelCenter(doseVol1.data.voxelArr[dim]) })
       Object.keys(doseVol2.data.voxelArr).forEach((dim) => { voxelArr[dim] = getVoxelCenter(doseVol2.data.voxelArr[dim]) })
 
@@ -133,7 +133,7 @@ class DoseComparisonVolume extends Volume { // eslint-disable-line no-unused-var
      */
   normalizeDose (normFactor) {
     // Initialize dose difference array
-    var doseDiff = new Array(this.data.dose1.length)
+    const doseDiff = new Array(this.data.dose1.length)
 
     // Take the difference
     for (let i = 0; i < this.data.dose1.length; i++) {
@@ -197,7 +197,7 @@ class DoseComparisonVolume extends Volume { // eslint-disable-line no-unused-var
     svg.selectAll('g.dose-contour').remove()
 
     // Draw contours
-    var contours = d3
+    const contours = d3
       .contours()
       .size([baseSlice.xVoxels, baseSlice.yVoxels])
       .smooth(false)
@@ -338,7 +338,7 @@ function trilinearInterpolation (voxelArr, data, grid) {
 }
 
 function getVoxelCenter (voxArr) {
-  var position = voxArr
+  let position = voxArr
   position = position.map((val, i) => {
     return val + (voxArr[i + 1] - val) / 2
   })

@@ -211,7 +211,7 @@ function updateVoxelInfo (worldCoords, densityVol, doseVol, densityVoxelCoords, 
  * @param {number} id The id of the volume viewer to update the dose profile.
  */
 function updateDoseProfiles (voxelCoords, worldCoords, id) {
-  var getCoords = (coords) => [
+  const getCoords = (coords) => [
     [coords[0], coords[1]],
     [coords[1], coords[2]],
     [coords[0], coords[2]]

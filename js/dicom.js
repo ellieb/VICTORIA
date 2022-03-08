@@ -43,7 +43,7 @@ function combineDICOMDoseData (DICOMList) { // eslint-disable-line no-unused-var
     }
   })
 
-  var DICOMData = {
+  return {
     voxelNumber: {
       x: numVox.x, // The number of x voxels
       y: numVox.y, // The number of y voxels
@@ -65,8 +65,6 @@ function combineDICOMDoseData (DICOMList) { // eslint-disable-line no-unused-var
     studyInstanceUID: sampleData.studyInstanceUID, // The study instance identifier
     units: sampleData.units // The dose units, either GY or RELATIVE
   }
-
-  return DICOMData
 }
 
 function combineDICOMDensityData (DICOMList) { // eslint-disable-line no-unused-vars
@@ -85,7 +83,7 @@ function combineDICOMDensityData (DICOMList) { // eslint-disable-line no-unused-
   const densityArrays = DICOMList.map((e) => Array.from((e.data.density)))
   const density = densityArrays.flat()
   // TODO: Remove the use of flat to be compatible with Safari
-  // var density = densityArrays.reduce(function (a, b) {
+  // const density = densityArrays.reduce(function (a, b) {
   //   return a.concat(b)
   // })
 
@@ -185,7 +183,7 @@ const UIDs = {
   '1.2.840.10008.5.1.4.1.1.481.3': 'RT Structure Set Storage'
 }
 
-var isStringVr = (vr) => !(
+const isStringVr = (vr) => !(
   vr === 'AT' ||
   vr === 'OB' ||
   vr === 'OW' ||
@@ -193,9 +191,9 @@ var isStringVr = (vr) => !(
   vr === 'US'
 )
 
-var getVal = function (dataSet, vr, propertyAddress) {
-  var val
-  var text = ''
+const getVal = function (dataSet, vr, propertyAddress) {
+  let val
+  let text = ''
 
   // If the value representation is a string
   if (isStringVr(vr)) {
@@ -203,15 +201,15 @@ var getVal = function (dataSet, vr, propertyAddress) {
 
     // If the value representation is an attribute tag
   } else if (vr === 'AT') {
-    var group = dataSet.uint16(propertyAddress, 0)
-    var groupHexStr = ('0000' + group.toString(16)).substr(-4)
-    var xElement = dataSet.uint16(propertyAddress, 1)
-    var elementHexStr = ('0000' + xElement.toString(16)).substr(-4)
+    const group = dataSet.uint16(propertyAddress, 0)
+    const groupHexStr = ('0000' + group.toString(16)).substr(-4)
+    const xElement = dataSet.uint16(propertyAddress, 1)
+    const elementHexStr = ('0000' + xElement.toString(16)).substr(-4)
     val = 'x' + groupHexStr + elementHexStr
 
     // If the value representation is other byte string or other word string
   } else if (vr === 'OB' || vr === 'OW') {
-    var dataElement = dataSet.elements[propertyAddress]
+    const dataElement = dataSet.elements[propertyAddress]
     const bitsAllocated = dataSet.uint16('x00280100')
 
     // If the offset is not divisible the the byte number, slice the buffer
@@ -236,7 +234,7 @@ var getVal = function (dataSet, vr, propertyAddress) {
     // If the value representation is unsigned short
   } else if (vr === 'US') {
     text += dataSet.uint16(propertyAddress)
-    for (var i = 1; i < dataSet.elements[propertyAddress].length / 2; i++) {
+    for (let i = 1; i < dataSet.elements[propertyAddress].length / 2; i++) {
       text += '\\' + dataSet.uint16(propertyAddress, i)
     }
     val = text
@@ -245,18 +243,18 @@ var getVal = function (dataSet, vr, propertyAddress) {
 }
 
 function getTag (tag) {
-  var group = tag.substring(1, 5).toLowerCase()
-  var element = tag.substring(5, 9).toLowerCase()
-  var tagIndex = 'x' + group + element
-  var attr = elementProperties[tagIndex]
+  const group = tag.substring(1, 5).toLowerCase()
+  const element = tag.substring(5, 9).toLowerCase()
+  const tagIndex = 'x' + group + element
+  const attr = elementProperties[tagIndex]
   return attr
 }
 
 function dumpDataSet (dataSet, values) {
   for (const elementAddress in dataSet.elements) {
-    var element = dataSet.elements[elementAddress]
-    var property = elementProperties[elementAddress]
-    var tag = getTag(element.tag)
+    const element = dataSet.elements[elementAddress]
+    const property = elementProperties[elementAddress]
+    const tag = getTag(element.tag)
     if (tag === undefined) {
       continue
     }
@@ -267,7 +265,7 @@ function dumpDataSet (dataSet, values) {
         dumpDataSet(item.dataSet, values[property.keyword][i])
       })
     } else {
-      var vr = (element.vr !== undefined) ? element.vr : tag.vr
+      const vr = (element.vr !== undefined) ? element.vr : tag.vr
       values[property.keyword] = getVal(dataSet, vr, elementAddress)
     }
   }
@@ -305,14 +303,14 @@ function processDICOMSlice (arrayBuffer) { // eslint-disable-line no-unused-vars
       return Number(v) / 10.0
     })
 
-    // var Px = (i, j) => Xx * xVoxSize * i + Yx * yVoxSize * j + Sx
-    // var Py = (i, j) => Xy * xVoxSize * i + Yy * yVoxSize * j + Sy
-    // var Pz = (i, j) => Xz * xVoxSize * i + Yz * yVoxSize * j + Sz
+    // const Px = (i, j) => Xx * xVoxSize * i + Yx * yVoxSize * j + Sx
+    // const Py = (i, j) => Xy * xVoxSize * i + Yy * yVoxSize * j + Sy
+    // const Pz = (i, j) => Xz * xVoxSize * i + Yz * yVoxSize * j + Sz
 
-    var xArr = [...Array(nCols + 1)].map((e, i) => (XY[0] * xVoxSize * (i - 0.5) + Sx))
-    var yArr = [...Array(nRows + 1)].map((e, j) => (XY[4] * yVoxSize * (j - 0.5) + Sy))
+    const xArr = [...Array(nCols + 1)].map((e, i) => (XY[0] * xVoxSize * (i - 0.5) + Sx))
+    const yArr = [...Array(nRows + 1)].map((e, j) => (XY[4] * yVoxSize * (j - 0.5) + Sy))
 
-    var DICOMSlice = {
+    const DICOMSlice = {
       type: dicomType,
       sliceNum: parseInt(propertyValues.InstanceNumber),
       voxelNumber: {
@@ -378,13 +376,8 @@ function processDICOMSlice (arrayBuffer) { // eslint-disable-line no-unused-vars
 
       const ROINum = parseInt(contourSequence.ReferencedROINumber)
 
-      const structureSetSequence = propertyValues.StructureSetROISequence.find((item) => {
-        if (parseInt(item.ROINumber) === ROINum) return true
-      })
-
-      const RTROIObservationsSequence = propertyValues.RTROIObservationsSequence.find((item) => {
-        if (parseInt(item.ReferencedROINumber) === ROINum) return true
-      })
+      const structureSetSequence = propertyValues.StructureSetROISequence.find((item) => parseInt(item.ROINumber) === ROINum)
+      const RTROIObservationsSequence = propertyValues.RTROIObservationsSequence.find((item) => parseInt(item.ReferencedROINumber) === ROINum)
 
       ROIs[i] = { type: dicomType, ...contourSequence, ...structureSetSequence, ...RTROIObservationsSequence }
     }

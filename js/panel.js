@@ -157,8 +157,8 @@ class Panel { // eslint-disable-line no-unused-vars
     }
 
     function dragged () {
-      var x = d3.event.x
-      var y = d3.event.y
+      const x = d3.event.x
+      const y = d3.event.y
 
       d3.select(this).select('circle').attr('cx', x).attr('cy', y)
       d3.select(this).select('line.crosshairX').attr('x1', x).attr('x2', x)
@@ -213,7 +213,7 @@ class Panel { // eslint-disable-line no-unused-vars
       : coords
 
     // Add new marker with modified coordinates so it can smoothly transform with other elements
-    var markerHolder = this.axisElements['plot-marker']
+    const markerHolder = this.axisElements['plot-marker']
       .append('g')
       .attr('class', 'marker')
       .attr(

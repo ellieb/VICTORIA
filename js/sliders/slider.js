@@ -95,7 +95,7 @@ class Slider { // eslint-disable-line no-unused-vars
     const mainDiv = parentDiv.append('div').attr('class', 'slider-container')
 
     if (margin) {
-      var getMarginStr = (margin) =>
+      const getMarginStr = (margin) =>
         margin.top +
         'px ' +
         margin.right +
@@ -179,7 +179,7 @@ class Slider { // eslint-disable-line no-unused-vars
   initializeBehaviour (format, startingVal, minVal, maxVal, step) {
     const sliderNode = this.slider.node()
 
-    var updateSliderOnChange = (val) => {
+    const updateSliderOnChange = (val) => {
       // Update slider text
       this.sliderValue.text(format(val))
 
@@ -187,7 +187,7 @@ class Slider { // eslint-disable-line no-unused-vars
       if (this.onSliderChangeCallback !== undefined) this.onSliderChangeCallback(val)
     }
 
-    var updateSliderOnRelease = (val) => {
+    const updateSliderOnRelease = (val) => {
       // Update slider text
       this.sliderValue.text(format(val))
 

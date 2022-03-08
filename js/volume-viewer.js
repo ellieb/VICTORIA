@@ -146,8 +146,8 @@ class VolumeViewer { // eslint-disable-line no-unused-vars
       : baseSlice.yScale
 
     // Create and append the x and y axes
-    var xAxis = d3.axisBottom().scale(xScale).ticks(6)
-    var yAxis = d3.axisLeft().scale(yScale).ticks(6)
+    const xAxis = d3.axisBottom().scale(xScale).ticks(6)
+    const yAxis = d3.axisLeft().scale(yScale).ticks(6)
 
     svgAxis
       .append('g')
@@ -160,13 +160,13 @@ class VolumeViewer { // eslint-disable-line no-unused-vars
       .call(yAxis)
 
     // Create and append the x and y grids
-    var xAxisGrid = d3
+    const xAxisGrid = d3
       .axisBottom()
       .scale(xScale)
       .tickSize(-volume.dimensions.height)
       .tickFormat('')
       .ticks(6)
-    var yAxisGrid = d3
+    const yAxisGrid = d3
       .axisLeft()
       .scale(yScale)
       .tickSize(-volume.dimensions.width)
@@ -268,7 +268,7 @@ class VolumeViewer { // eslint-disable-line no-unused-vars
     }
 
     const dims = 'zxy'
-    var sliceNum, slicePos
+    let sliceNum, slicePos
 
     // Get the average of items at index i and i+1
     const getPos = (arr, i) => (arr[i] + arr[i + 1]) / 2.0
@@ -376,7 +376,7 @@ class VolumeViewer { // eslint-disable-line no-unused-vars
 
     this.initializeDensityLegend(this.minDensityVar, this.maxDensityVar)
     const dims = 'zxy'
-    var sliceNum, slicePos
+    let sliceNum, slicePos
 
     // Get the average of items at index i and i+1
     const getPos = (arr, i) => (arr[i] + arr[i + 1]) / 2.0
@@ -940,7 +940,7 @@ class VolumeViewer { // eslint-disable-line no-unused-vars
    */
   buildLegend (legendDimensions) {
     // Set up legends
-    var getLegendHolderAndSvg = (className, legendDimensions) => {
+    const getLegendHolderAndSvg = (className, legendDimensions) => {
       const legendHolderSpan = this.legendHolder
         .append('span')
         .attr('class', className + '-legend-holder')
@@ -1255,7 +1255,7 @@ class VolumeViewer { // eslint-disable-line no-unused-vars
       .text(params.legendTitle)
 
     // Create legend
-    var legend = d3
+    const legend = d3
       .legendColor()
       .shapeWidth(10)
       .ascending(params.ascending)
@@ -1354,7 +1354,7 @@ class VolumeViewer { // eslint-disable-line no-unused-vars
    */
   initializeDoseContourInput () {
     const legendHolder = this.doseLegendHolder
-    var addNewThresholdPercent = () => {
+    const addNewThresholdPercent = () => {
       const val = parseFloat(submitDoseContour.node().value)
       const newPercentage = val / 100.0
       if (!Number.isNaN(newPercentage)) {
@@ -1423,7 +1423,7 @@ class VolumeViewer { // eslint-disable-line no-unused-vars
       const canvas = document.createElement('canvas')
       const context = canvas.getContext('2d')
       const [minVal, maxVal] = colour.domain()
-      var val
+      let val
       for (let i = 0; i < height; ++i) {
         val = colour(((n - i) / n) * (maxVal - minVal) + minVal)
         context.fillStyle = 'black'
@@ -1559,7 +1559,7 @@ class VolumeViewer { // eslint-disable-line no-unused-vars
     this.initializeDoseContourInput()
 
     const dims = 'zxy'
-    var sliceNum, slicePos
+    let sliceNum, slicePos
 
     // Get the average of items at index i and i+1
     const getPos = (arr, i) => (arr[i] + arr[i + 1]) / 2.0

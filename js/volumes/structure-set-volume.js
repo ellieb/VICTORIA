@@ -72,7 +72,7 @@ class StructureSetVolume extends Volume { // eslint-disable-line no-unused-vars
   // TODO: Speed this function up
   makeOutlines (data) {
     const ROIOutlines = []
-    var ROI
+    let ROI
 
     // If val is smaller than range min or larger than range max, update range
     const setExtrema = (val, range) => {
@@ -101,8 +101,8 @@ class StructureSetVolume extends Volume { // eslint-disable-line no-unused-vars
         const contourData = []
         const rangeVals = { x: [], y: [], z: [] }
         // const contourGeometricType = new Set()
-        var prevZ = 0
-        var values, sliceContourData, z
+        let prevZ = 0
+        let values, sliceContourData, z
 
         // For each slice of the contour data
         ROI.ContourSequence.forEach((sequence) => {
@@ -152,14 +152,14 @@ class StructureSetVolume extends Volume { // eslint-disable-line no-unused-vars
           // Build the voxel information for the ROI array
           const voxelNumber = {}
           const scales = {}
-          Object.entries(voxelArr).map(([dim, arr]) => {
+          Object.entries(voxelArr).forEach(([dim, arr]) => {
             voxelNumber[dim] = arr.length
             const domain = arr.length === 1 ? arr : [arr[0] - increments[dim] / 2, arr[arr.length - 1] + increments[dim] / 2]
             scales[dim] = d3.scaleQuantize().domain(domain).range(d3.range(0, arr.length, 1))
           })
 
           // Build the ROI array
-          var ROIArray = this.makeROIArray(contourData, voxelNumber, voxelArr, scales)
+          const ROIArray = this.makeROIArray(contourData, voxelNumber, voxelArr, scales)
 
           // TODO: Handle point data
           ROIOutlines.push({
@@ -215,7 +215,7 @@ class StructureSetVolume extends Volume { // eslint-disable-line no-unused-vars
 
     // Returns the y range of the polygon
     const polygonYRange = (polygon) => {
-      var minY = polygon[0][1]; var maxY = polygon[0][1]
+      let minY = polygon[0][1]; let maxY = polygon[0][1]
 
       polygon.forEach((point) => {
         if (point[1] < minY) minY = point[1]
@@ -226,7 +226,7 @@ class StructureSetVolume extends Volume { // eslint-disable-line no-unused-vars
 
     // Returns the x position of the intersection of the lines with the y position
     const getMeetPoints = (y, lines) => {
-      var meet = []
+      const meet = []
 
       lines.forEach((line) => {
         if (line.isValidY(y)) {
@@ -244,10 +244,10 @@ class StructureSetVolume extends Volume { // eslint-disable-line no-unused-vars
     for (let k = 0; k < voxelNumber.z; k++) {
       // For each contour slice
       contourData[k].vals.forEach((polygon) => {
-        var [minY, maxY] = polygonYRange(polygon)
+        const [minY, maxY] = polygonYRange(polygon)
 
         // Build a list of edges between each vertex in the polygon
-        var lines = []
+        const lines = []
         for (let i = 1; i < polygon.length; i++) {
           lines.push(new Line(polygon[i - 1], polygon[i]))
         }
@@ -256,11 +256,11 @@ class StructureSetVolume extends Volume { // eslint-disable-line no-unused-vars
         // Move the scan line step by step from the smallest to the biggest
         // y-coordinate (voxArr.y is already sorted)
         voxelArr.y.forEach((yVal, j) => {
-          var i0, i1
+          let i0, i1
 
           if ((minY <= yVal) && (maxY >= yVal)) {
             // Get the x coordinate of polygon intersections with the scan line
-            var meetPoints = getMeetPoints(yVal, lines)
+            const meetPoints = getMeetPoints(yVal, lines)
             // For each pair of intersections
             for (let idx = 1; idx < meetPoints.length; idx += 2) {
               i0 = scales.x(meetPoints[idx - 1])
@@ -286,14 +286,14 @@ class StructureSetVolume extends Volume { // eslint-disable-line no-unused-vars
      */
   getSlices (axis, slicePos) {
     // Collect all ROIs that contain a point at slicePos
-    var insideRange = (range, val) => (val > range[0] && val < range[1]) || (val < range[0] && val > range[1])
+    const insideRange = (range, val) => (val > range[0] && val < range[1]) || (val < range[0] && val > range[1])
     const ROIOutlinesInRange = this.ROIOutlines.filter((ROIOutline) => ((axis === 'xy' && insideRange(ROIOutline.scales.z.domain(), slicePos)) ||
       (axis === 'yz' && insideRange(ROIOutline.scales.x.domain(), slicePos)) ||
       (axis === 'xz' && insideRange(ROIOutline.scales.y.domain(), slicePos)))
     )
 
-    var getArrRange = (arr) => ([arr[0], [arr[arr.length - 1]]])
-    var getXYRange = (axis, voxArr) => ([getArrRange(voxArr[axis[0]]), getArrRange(voxArr[axis[1]])])
+    const getArrRange = (arr) => ([arr[0], [arr[arr.length - 1]]])
+    const getXYRange = (axis, voxArr) => ([getArrRange(voxArr[axis[0]]), getArrRange(voxArr[axis[1]])])
 
     // For each ROI in the range, calculate the data slice that intersects slicePos
     const slices = ROIOutlinesInRange.map((ROIOutline) => {
@@ -356,7 +356,7 @@ class StructureSetVolume extends Volume { // eslint-disable-line no-unused-vars
      * of the slice.
      */
   plotStructureSet (axis, slicePos, svg, volume, zoomTransform, hiddenClassList) {
-    var toCSSClass = (className) => className.replace(/[|~ ! @ $ % ^ & * ( ) + = , . / ' ; : " ? > < \[ \] \ \{ \} | ]/g, '') // eslint-disable-line no-useless-escape
+    const toCSSClass = (className) => className.replace(/[|~ ! @ $ % ^ & * ( ) + = , . / ' ; : " ? > < \[ \] \ \{ \} | ]/g, '') // eslint-disable-line no-useless-escape
 
     const slices = this.getSlices(axis, slicePos)
     const baseSlice = volume.baseSlices[axis]
@@ -388,7 +388,7 @@ class StructureSetVolume extends Volume { // eslint-disable-line no-unused-vars
       })
 
       // Draw contours
-      var contours = d3
+      const contours = d3
         .contours()
         .size([slice.xVoxels, slice.yVoxels])
         .thresholds([1])
@@ -436,7 +436,7 @@ class StructureSetVolume extends Volume { // eslint-disable-line no-unused-vars
      */
   calculateDVH (doseVolume, nThresholds = 250) {
     // Convert index in 1D array to x, y, z coords
-    var to3d = (idx, voxelNumber) => {
+    const to3d = (idx, voxelNumber) => {
       const k = Math.floor(idx / (voxelNumber.y * voxelNumber.x))
       idx -= (k * voxelNumber.y * voxelNumber.x) // = idx % voxelNumber.y
       const j = Math.floor(idx / voxelNumber.x)
@@ -445,10 +445,10 @@ class StructureSetVolume extends Volume { // eslint-disable-line no-unused-vars
     }
 
     // Convert x, y, z coords to world coords
-    var toPos = ([i, j, k], voxelArr) => [voxelArr.x[i], voxelArr.y[j], voxelArr.z[k]]
+    const toPos = ([i, j, k], voxelArr) => [voxelArr.x[i], voxelArr.y[j], voxelArr.z[k]]
 
     // Set the parameters for the histogram
-    var histogram = d3.histogram()
+    const histogram = d3.histogram()
       .domain([0, doseVolume.data.maxDose])
       .thresholds(nThresholds)
 
@@ -460,7 +460,7 @@ class StructureSetVolume extends Volume { // eslint-disable-line no-unused-vars
       // Initialize histogramList
       const doseList = []
       let coords, pos, dose
-      var nVals = 0
+      let nVals = 0
 
       // Go through each element in the ROI array
       ROIOutline.ROIArray.forEach((val, i) => {
@@ -472,8 +472,8 @@ class StructureSetVolume extends Volume { // eslint-disable-line no-unused-vars
       })
 
       // Create and add ROI histogram to list
-      var bins = histogram(doseList)
-      var binLength = bins.map((binList) => binList.length / nVals)
+      const bins = histogram(doseList)
+      const binLength = bins.map((binList) => binList.length / nVals)
       ROIHistograms.push(binLength)
     })
     return ROIHistograms

@@ -37,12 +37,12 @@
  * @param {Object} data The .egsphant file read as text.
  * @returns {Object}
  */
-var processPhantomData = function (data) { // eslint-disable-line no-unused-vars
-  var getMax = function (a) {
+const processPhantomData = function (data) { // eslint-disable-line no-unused-vars
+  const getMax = function (a) {
     return Math.max(...a.map((e) => (Array.isArray(e) ? getMax(e) : e)))
   }
 
-  var getMin = function (a) {
+  const getMin = function (a) {
     return Math.min(...a.map((e) => (Array.isArray(e) ? getMin(e) : e)))
   }
 
@@ -151,7 +151,7 @@ var processPhantomData = function (data) { // eslint-disable-line no-unused-vars
  * @param {Object} data The .3ddose file read as text.
  * @returns {Object}
  */
-var processDoseData = function (data) { // eslint-disable-line no-unused-vars
+const processDoseData = function (data) { // eslint-disable-line no-unused-vars
   // The current line of the text file being read
   let curr = 0
 
@@ -251,7 +251,7 @@ var processDoseData = function (data) { // eslint-disable-line no-unused-vars
  * @param {Object} data The .csv file read as text.
  * @returns {Object}
  */
-var processCsvData = function (data) { // eslint-disable-line no-unused-vars
+const processCsvData = function (data) { // eslint-disable-line no-unused-vars
   // The current line of the text file being read
 
   const DIMS = ['x', 'y', 'z']

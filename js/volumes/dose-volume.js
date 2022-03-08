@@ -99,7 +99,7 @@ class DoseVolume extends Volume { // eslint-disable-line no-unused-vars
     svg.selectAll('g.dose-contour').remove()
 
     // Draw contours
-    var contours = d3
+    const contours = d3
       .contours()
       .size([baseSlice.xVoxels, baseSlice.yVoxels])
       .smooth(false)
