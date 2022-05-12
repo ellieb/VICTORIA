@@ -31,6 +31,8 @@
 // definitions for StandardJS formatter
 /* global d3 */
 
+const SPACE_REGEX = /\s+/
+
 /**
  * Extract data from .egsphant files.
  *
@@ -59,12 +61,12 @@ const processPhantomData = function (data) { // eslint-disable-line no-unused-va
   })
 
   curr += numMaterials
-  curr += (data[curr].trim().split(/ +/).length === numMaterials) ? 1 : numMaterials
+  curr += (data[curr].trim().split(SPACE_REGEX).length === numMaterials) ? 1 : numMaterials
 
   // Get number of x, y, and z voxels
   const [numVoxX, numVoxY, numVoxZ] = data[curr++]
     .trim()
-    .split(/ +/)
+    .split(SPACE_REGEX)
     .map((v) => {
       return parseInt(v)
     })
@@ -73,7 +75,7 @@ const processPhantomData = function (data) { // eslint-disable-line no-unused-va
   const [xArr, yArr, zArr] = data.slice(curr, curr + 3).map((subArr) => { // eslint-disable-line no-global-assign
     return subArr
       .trim()
-      .split(/ +/)
+      .split(SPACE_REGEX)
       .map((v) => {
         return parseFloat(v)
       })
@@ -109,7 +111,7 @@ const processPhantomData = function (data) { // eslint-disable-line no-unused-va
   const densityGrid = lines.map((subArr) => {
     return subArr
       .trim()
-      .split(/ +/)
+      .split(SPACE_REGEX)
       .map((v) => {
         return parseFloat(v)
       })
@@ -158,7 +160,7 @@ const processDoseData = function (data) { // eslint-disable-line no-unused-vars
   // Get number of x, y, and z voxels
   const [numVoxX, numVoxY, numVoxZ] = data[curr++]
     .trim()
-    .split(/ +/)
+    .split(SPACE_REGEX)
     .map((v) => {
       return parseInt(v)
     })
@@ -170,7 +172,7 @@ const processDoseData = function (data) { // eslint-disable-line no-unused-vars
       arr.push(
         ...data[curr++]
           .trim()
-          .split(/ +/)
+          .split(SPACE_REGEX)
           .map((v) => parseFloat(v))
       )
     }
@@ -188,7 +190,7 @@ const processDoseData = function (data) { // eslint-disable-line no-unused-vars
         arr.push(
           ...data[curr++]
             .trim()
-            .split(/ +/)
+            .split(SPACE_REGEX)
             .map((v) => parseFloat(v))
         )
       }
@@ -199,7 +201,7 @@ const processDoseData = function (data) { // eslint-disable-line no-unused-vars
       [doseDense, error] = data.slice(prevCurr, prevCurr + 2).map((arr) => {
         return arr
           .trim()
-          .split(/ +/)
+          .split(SPACE_REGEX)
           .slice(0, numVoxX * numVoxY * numVoxZ)
           .map((v) => parseFloat(v))
       })
