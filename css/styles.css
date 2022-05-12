@@ -43,17 +43,14 @@ body {
 div.header {
   display: flex;
   justify-content: space-between;
-}
-
-.header img {
-  width: 100px;
-  height: 75px;
+  align-items: center;
 }
 
 .header h1 {
   font-size: 30px;
   flex-grow: 1;
   border-bottom: 3px solid black;
+  margin: 10px 0px;
 }
 
 text, text.tick, .label {

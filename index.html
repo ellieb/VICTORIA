@@ -31,15 +31,24 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
-    <meta content="utf-8" http-equiv="encoding">
-    <title>UVic Dose Dig</title>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <meta content="utf-8" http-equiv="encoding" />
+    <title>VICTORIA</title>
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <link rel="stylesheet" href="/css/styles.css" />
-    <script async src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.js"></script>
+    <script
+      async
+      src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.js"
+    ></script>
     <script async src="http://cdn.jsdelivr.net/g/filesaver.js"></script>
-    <script async src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
-    <script async src="https://cdn.jsdelivr.net/npm/dicom-parser@1.8.7/dist/dicomParser.min.js"></script>
+    <script
+      async
+      src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"
+    ></script>
+    <script
+      async
+      src="https://cdn.jsdelivr.net/npm/dicom-parser@1.8.7/dist/dicomParser.min.js"
+    ></script>
   </head>
   <body>
     <div class="backdrop" style="display: none"></div>
@@ -51,9 +60,27 @@
       </div>
     </div>
     <div class="header">
-      <h1>UVic Dose Dig</h1>
-      <img src="./images/logo.jpg" alt="XCITE Lab logo" />
+      <h1>
+        VICTORIA<br />
+        <small
+          >V<span style="color: gray">oxel</span> I<span style="color: gray">nteractive</span>
+          C<span style="color: gray">ontour</span> T<span style="color: gray">ool for</span> O<span
+            style="color: gray"
+            >nline</span
+          >
+          R<span style="color: gray">adiation</span> I<span style="color: gray">ntensity</span>
+          A<span style="color: gray">nalytics</span></small
+        >
+        <span style="font-size: 40%">by Ellie Badun</span>
+      </h1>
+      <a href="http://web.uvic.ca/~bazalova"
+        ><img src="../pics/XCITElogo.png" alt="XCITE Lab logo" style="width: 260px" align="right"
+      /></a>
     </div>
+    <p>
+      A short paper describing VICTORIA can be found on
+      <a href="https://arxiv.org/abs/2105.14145">arXiv</a>.
+    </p>
     <p class="description">Upload your own .egsphant, .3ddose, .dcm, or TOPAS .csv files.</p>
     <div id="drop-area">
       <p>
@@ -74,15 +101,11 @@
           style="display: none"
           disabled
         />
-        <label for="density-profile-checkbox" style="display: none">
-          Plot density?
-        </label>
+        <label for="density-profile-checkbox" style="display: none"> Plot density? </label>
         <br />
       </span>
       <div id="image-to-print"></div>
-      <button id="add-volume-viewer">
-        Add new volume viewer
-      </button>
+      <button id="add-volume-viewer">Add new volume viewer</button>
     </div>
     <script type="text/javascript" src="js/cache-worker.mjs"></script>
     <script type="text/javascript" src="js/index.js"></script>
