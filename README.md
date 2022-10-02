@@ -1,5 +1,7 @@
 # VICTORIA
 
+The web app can be used on the XCITE lab website: http://web.uvic.ca/~bazalova/VICTORIA/
+
 VICTORIA is a web-based visualization tool for DICOM, EGSnrc phantom, and EGSnrc dose
 files. To use, either upload .3ddose, .egsphant, or DICOM files; or use the test files
 available. If two or more dose files are uploaded, they can be compared in the
