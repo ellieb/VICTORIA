@@ -1415,7 +1415,7 @@ class VolumeViewer { // eslint-disable-line no-unused-vars
    */
   initializeDensityLegend (minDensityVar = this.minDensityVar, maxDensityVar = this.maxDensityVar) {
     const legendClass = 'densityLegend'
-    const title = 'Density'
+    const title = this.densityVolume.isDicom ? 'HU' : 'Density'
     const dims = this.legendDimensions
     const colourMap = d3.scaleSqrt().domain([minDensityVar, maxDensityVar]).range([0, 255])
 
