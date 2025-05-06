@@ -93,7 +93,7 @@ const defineExportDVHToCSVButtonBehaviour = function (volumeViewer) { // eslint-
     // Put data in desired format before converting to csv
     const ROIs = volumeViewer.DVH.data
     const DVHData = ROIs[0].values.map((val, idx) => {
-      const obj = { dose: val.x }
+      const obj = volumeViewer.doseNorm ? { "Dose (cGy)": val.x * volumeViewer.doseNorm } : { "Dose (cGy)": val.x } 
       ROIs.forEach((ROI) => {
         obj[ROI.key] = ROI.values[idx].y
       })
