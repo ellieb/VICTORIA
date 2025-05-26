@@ -3,3 +3,6 @@
 
 # ignore node modules
 node_modules/
+
+# ignore xcite script
+xcite-script.js
