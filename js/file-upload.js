@@ -53,9 +53,11 @@
 /* global processPhantomData */
 /* global processDoseData */
 /* global processDoseDataFromFile */
+/* global processPhantomDataFromFile */
 /* global processCsvData */
 /* global processDICOMSlice */
 /* global STREAMING_DOSE_THRESHOLD_BYTES */
+/* global STREAMING_PHANTOM_THRESHOLD_BYTES */
 /* global showModal */
 
 // import {
@@ -368,7 +370,6 @@ function handleFiles (files) {
     })
 }
 
-
 /**
  * Parse file contents from an ArrayBuffer based on extension.
  *
@@ -436,6 +437,39 @@ function finishFileReadProgress (fileNum, totalFiles) {
 }
 
 /**
+ * Read a large file with chunked parsing and progress updates.
+ *
+ * @param {Function} resolve
+ * @param {Function} reject
+ * @param {File} file
+ * @param {number} fileNum
+ * @param {number} totalFiles
+ * @param {string} ext
+ * @param {string} fileName
+ * @param {Function} processFn
+ */
+function readFileStreaming (resolve, reject, file, fileNum, totalFiles, ext, fileName, processFn) {
+  console.log('File reading started (streaming)')
+
+  processFn(file, (loaded, total) => {
+    updateProgress(
+      Math.floor((loaded / total) * 100),
+      fileNum,
+      totalFiles
+    )
+  })
+    .then((data) => {
+      resolve({ data: data, ext: ext, fileName: fileName })
+      console.log('Finished processing data')
+      finishFileReadProgress(fileNum, totalFiles)
+    })
+    .catch((error) => {
+      reject(error.message || String(error))
+      finishFileReadProgress(fileNum, totalFiles)
+    })
+}
+
+/**
  * Read each file and create a dose or density volume object.
  *
  * @param {File} file       The file to be processed.
@@ -447,25 +481,16 @@ function readFile (resolve, reject, file, fileNum, totalFiles) {
   const ext = fileName.split('.').pop().toLowerCase()
 
   if (ext === '3ddose' && file.size >= STREAMING_DOSE_THRESHOLD_BYTES) {
-    console.log('File reading started (streaming)')
+    readFileStreaming(
+      resolve, reject, file, fileNum, totalFiles, ext, fileName, processDoseDataFromFile
+    )
+    return
+  }
 
-    processDoseDataFromFile(file, (loaded, total) => {
-      updateProgress(
-        Math.floor((loaded / total) * 100),
-        fileNum,
-        totalFiles
-      )
-    })
-      .then((data) => {
-        resolve({ data: data, ext: ext, fileName: fileName })
-        console.log('Finished processing data')
-        finishFileReadProgress(fileNum, totalFiles)
-      })
-      .catch((error) => {
-        reject(error.message || String(error))
-        finishFileReadProgress(fileNum, totalFiles)
-      })
-
+  if (ext === 'egsphant' && file.size >= STREAMING_PHANTOM_THRESHOLD_BYTES) {
+    readFileStreaming(
+      resolve, reject, file, fileNum, totalFiles, ext, fileName, processPhantomDataFromFile
+    )
     return
   }
 

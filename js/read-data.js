@@ -37,6 +37,7 @@ const SPACE_REGEX = /\s+/
 const TEXT_DECODER = new TextDecoder('utf-8')
 const LATIN1_DECODER = new TextDecoder('iso-8859-1')
 const STREAMING_DOSE_THRESHOLD_BYTES = 64 * 1024 * 1024 // eslint-disable-line no-unused-vars
+const STREAMING_PHANTOM_THRESHOLD_BYTES = 64 * 1024 * 1024 // eslint-disable-line no-unused-vars
 const FILE_READ_CHUNK_BYTES = 16 * 1024 * 1024
 
 /**
@@ -330,6 +331,244 @@ const processDoseDataFromFile = async function (file, onProgress) { // eslint-di
 }
 
 /**
+ * @param {string[]} materialList
+ * @returns {Object}
+ */
+function buildMaterialDict (materialList) {
+  const materialDict = { 0: 'VACUUM' }
+  const toSymbol = (i) => String.fromCharCode(((i + 16) % 95) + 32)
+  materialList.forEach((materialName, i) => {
+    materialDict[toSymbol(i + 1)] = materialName
+  })
+  return materialDict
+}
+
+/**
+ * @param {number} numVoxX
+ * @param {number} numVoxY
+ * @param {number} numVoxZ
+ * @param {number[]} xArr
+ * @param {number[]} yArr
+ * @param {number[]} zArr
+ * @param {Array<number>} density
+ * @param {string[]} material
+ * @param {Object} materialDict
+ * @param {number} minDensity
+ * @param {number} maxDensity
+ * @returns {Object}
+ */
+function buildPhantomVolumeResult (
+  numVoxX, numVoxY, numVoxZ, xArr, yArr, zArr,
+  density, material, materialDict, minDensity, maxDensity
+) {
+  return {
+    voxelNumber: {
+      x: numVoxX,
+      y: numVoxY,
+      z: numVoxZ
+    },
+    voxelArr: {
+      x: xArr,
+      y: yArr,
+      z: zArr
+    },
+    voxelSize: {
+      x: xArr[1] - xArr[0],
+      y: yArr[1] - yArr[0],
+      z: zArr[1] - zArr[0]
+    },
+    density: density,
+    materialDict: materialDict,
+    material: material,
+    minDensity: minDensity,
+    maxDensity: maxDensity
+  }
+}
+
+/**
+ * @param {Function} readLine
+ * @param {number} numMaterials
+ */
+async function skipMaterialDensityLines (readLine, numMaterials) {
+  const line = await readLine()
+  if (line === null) {
+    throw new Error('Unexpected end of file while reading material densities')
+  }
+  const parts = line.trim().split(SPACE_REGEX).filter(Boolean)
+  if (parts.length !== numMaterials) {
+    for (let i = 1; i < numMaterials; i++) {
+      const extra = await readLine()
+      if (extra === null) {
+        throw new Error('Unexpected end of file while reading material densities')
+      }
+    }
+  }
+}
+
+/**
+ * @param {Function} readLine
+ * @param {number} numLines
+ * @param {string} [firstLine]
+ * @returns {Promise<string[]>}
+ */
+async function readFixedSectionLines (readLine, numLines, firstLine) {
+  const lines = []
+  let consumed = 0
+
+  if (firstLine !== undefined) {
+    const trimmed = firstLine.trim()
+    if (trimmed.length > 0) {
+      lines.push(trimmed)
+    }
+    consumed = 1
+  }
+
+  for (let i = consumed; i < numLines; i++) {
+    const line = await readLine()
+    if (line === null) {
+      throw new Error('Unexpected end of file while reading phantom data')
+    }
+    const trimmed = line.trim()
+    if (trimmed.length > 0) {
+      lines.push(trimmed)
+    }
+  }
+
+  return lines
+}
+
+/**
+ * @param {Function} readLine
+ * @param {number} numLines
+ * @param {number} numVoxX
+ * @param {number} numVoxels
+ * @param {Function} [reportProgress]
+ * @returns {Promise<{ density: Array<number>, minDensity: number, maxDensity: number }>}
+ */
+async function parsePhantomDensityLines (readLine, numLines, numVoxX, numVoxels, reportProgress) {
+  const density = new Array(numVoxels)
+  let minDensity = Infinity
+  let maxDensity = -Infinity
+  let rowIndex = 0
+
+  for (let i = 0; i < numLines; i++) {
+    const line = await readLine()
+    if (line === null) {
+      throw new Error('Unexpected end of file while reading density data')
+    }
+
+    const trimmed = line.trim()
+    if (trimmed.length > 0) {
+      const parts = trimmed.split(SPACE_REGEX).filter(Boolean)
+      const rowStart = rowIndex * numVoxX
+
+      for (let j = 0; j < parts.length && j < numVoxX; j++) {
+        const val = parseFloat(parts[j])
+        const idx = rowStart + j
+        if (idx < numVoxels) {
+          density[idx] = val
+          if (val < minDensity) {
+            minDensity = val
+          }
+          if (val > maxDensity) {
+            maxDensity = val
+          }
+        }
+      }
+      rowIndex++
+    }
+
+    if (reportProgress) {
+      reportProgress()
+    }
+  }
+
+  return {
+    density: density.slice(0, numVoxels),
+    minDensity: minDensity === Infinity ? 0 : minDensity,
+    maxDensity: maxDensity === -Infinity ? 0 : maxDensity
+  }
+}
+
+/**
+ * Extract data from a large .egsphant file using chunked reads.
+ *
+ * @param {File} file
+ * @param {Function} [onProgress] Called as (bytesRead, totalBytes).
+ * @returns {Promise<Object>}
+ */
+const processPhantomDataFromFile = async function (file, onProgress) { // eslint-disable-line no-unused-vars
+  const reader = createAsciiFileReader(file)
+  const readLine = reader.readLine.bind(reader)
+
+  const reportProgress = () => {
+    if (onProgress) {
+      onProgress(reader.getContentStartOffset(), file.size)
+    }
+  }
+
+  let line = await readLine()
+  if (line === null) {
+    throw new Error('Unexpected end of file while reading material count')
+  }
+
+  const numMaterials = parseInt(line.trim())
+  const materialList = []
+
+  for (let i = 0; i < numMaterials; i++) {
+    line = await readLine()
+    if (line === null) {
+      throw new Error('Unexpected end of file while reading material names')
+    }
+    materialList.push(line.trim())
+  }
+
+  const materialDict = buildMaterialDict(materialList)
+  await skipMaterialDensityLines(readLine, numMaterials)
+  reportProgress()
+
+  line = await readLine()
+  if (line === null) {
+    throw new Error('Unexpected end of file while reading voxel counts')
+  }
+
+  const [numVoxX, numVoxY, numVoxZ] = line
+    .trim()
+    .split(SPACE_REGEX)
+    .filter(Boolean)
+    .map((v) => parseInt(v))
+
+  const xArr = await readBoundaryArray(readLine, numVoxX)
+  const yArr = await readBoundaryArray(readLine, numVoxY)
+  const zArr = await readBoundaryArray(readLine, numVoxZ)
+  reportProgress()
+
+  line = await readLine()
+  if (line === null) {
+    throw new Error('Unexpected end of file while reading material grid')
+  }
+
+  const firstMaterialLine = line.trim().length === 0 ? undefined : line
+  const numSectionLines = numVoxY * numVoxZ + numVoxZ
+  const material = await readFixedSectionLines(readLine, numSectionLines, firstMaterialLine)
+  reportProgress()
+
+  const numVoxels = numVoxX * numVoxY * numVoxZ
+  const { density, minDensity, maxDensity } = await parsePhantomDensityLines(
+    readLine,
+    numSectionLines,
+    numVoxX,
+    numVoxels,
+    reportProgress
+  )
+
+  return buildPhantomVolumeResult(
+    numVoxX, numVoxY, numVoxZ, xArr, yArr, zArr,
+    density, material, materialDict, minDensity, maxDensity
+  )
+}
+
+/**
  * Decode an ArrayBuffer as UTF-8 text.
  *
  * @param {ArrayBuffer} arrayBuffer
@@ -370,11 +609,7 @@ const processPhantomData = function (data) { // eslint-disable-line no-unused-va
   // Get number and type of materials
   const numMaterials = parseInt(data[curr++])
   const materialList = data.slice(curr, numMaterials + curr).map(mat => mat.trim())
-  const materialDict = { 0: 'VACUUM' }
-  const toSymbol = (i) => String.fromCharCode(((i + 16) % 95) + 32)
-  materialList.forEach((materialName, i) => {
-    materialDict[toSymbol(i + 1)] = materialName
-  })
+  const materialDict = buildMaterialDict(materialList)
 
   curr += numMaterials
   curr += (data[curr].trim().split(SPACE_REGEX).length === numMaterials) ? 1 : numMaterials
@@ -439,28 +674,10 @@ const processPhantomData = function (data) { // eslint-disable-line no-unused-va
   // TODO: .flat() does not work in Safari, find an alternative
   const density = densityGrid.flat().slice(0, numVoxX * numVoxY * numVoxZ)
 
-  return {
-    voxelNumber: {
-      x: numVoxX, // The number of x voxels
-      y: numVoxY, // The number of y voxels
-      z: numVoxZ // The number of z voxels
-    },
-    voxelArr: {
-      x: xArr, // The dimensions of x voxels
-      y: yArr, // The dimensions of x voxels
-      z: zArr // The dimensions of x voxels
-    },
-    voxelSize: {
-      x: xArr[1] - xArr[0],
-      y: yArr[1] - yArr[0],
-      z: zArr[1] - zArr[0]
-    },
-    density: density, // The flattened density matrix
-    materialDict: materialDict, // The materials in the phantom
-    material: material, // The flattened material matrix
-    minDensity: minDensity, // The minimum density value
-    maxDensity: maxDensity // The maximum density value
-  }
+  return buildPhantomVolumeResult(
+    numVoxX, numVoxY, numVoxZ, xArr, yArr, zArr,
+    density, material, materialDict, minDensity, maxDensity
+  )
 }
 
 /**
@@ -614,4 +831,4 @@ const processCsvData = function (data) { // eslint-disable-line no-unused-vars
   }
 }
 
-// export { arrayBufferToText, arrayBufferToLines, processDoseData, processDoseDataFromFile, processPhantomData, processCsvData, STREAMING_DOSE_THRESHOLD_BYTES }
+// export { arrayBufferToText, arrayBufferToLines, processDoseData, processDoseDataFromFile, processPhantomData, processPhantomDataFromFile, processCsvData, STREAMING_DOSE_THRESHOLD_BYTES, STREAMING_PHANTOM_THRESHOLD_BYTES }
