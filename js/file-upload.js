@@ -366,6 +366,60 @@ function handleFiles (files) {
     })
 }
 
+
+/**
+ * Parse file contents from an ArrayBuffer based on extension.
+ *
+ * @param {ArrayBuffer} buffer
+ * @param {string} ext Lower-case file extension.
+ * @returns {Object|null} Parsed volume data, or null if extension is unknown.
+ */
+function processUploadedBuffer (buffer, ext) {
+  if (ext === 'egsphant') {
+    return processPhantomData(arrayBufferToLines(buffer))
+  }
+  if (ext === '3ddose') {
+    return processDoseData(arrayBufferToLines(buffer))
+  }
+  if (ext === 'dcm') {
+    return processDICOMSlice(buffer)
+  }
+  if (ext === 'csv') {
+    return processCsvData(arrayBufferToText(buffer))
+  }
+  return null
+}
+
+/**
+ * Build a user-facing message when FileReader fails.
+ *
+ * @param {File} file
+ * @param {FileReader} reader
+ * @returns {string}
+ */
+function getFileReadErrorMessage (file, reader) {
+  const domError = reader.error
+  const detail = domError
+    ? (domError.message || domError.name)
+    : ''
+
+  const largeFileHintBytes = 512 * 1024 * 1024
+  const likelyTooLarge = file.size >= largeFileHintBytes 
+
+  if (likelyTooLarge) {
+    return (
+      `Could not load "${file.name}". ` +
+      'This file may be too large for the browser to load. ' +
+      (detail ? ` (${detail})` : '')
+    )
+  }
+
+  return (
+    `Could not load "${file.name}".` +
+    (detail ? ` ${detail}` : '')
+  )
+}
+
 /**
  * Read each file and create a dose or density volume object.
  *
@@ -395,7 +449,7 @@ function readFile (resolve, reject, file, fileNum, totalFiles) {
   })
 
   reader.addEventListener('error', function () {
-    alert('Failed to read file')
+    reject(getFileReadErrorMessage(file, reader))
     return true
   })
 
@@ -405,6 +459,11 @@ function readFile (resolve, reject, file, fileNum, totalFiles) {
   reader.addEventListener('load', function (e) {
     const result = e.target.result
     let data
+
+    if (result == null) {
+      reject(getFileReadErrorMessage(file, reader))
+      return true
+    }
 
     try {
       if (ext === 'egsphant') {
