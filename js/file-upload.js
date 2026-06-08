@@ -48,10 +48,14 @@
 /* global structureSetVolumeList */
 /* global combineDICOMDensityData */
 /* global combineDICOMDoseData */
+/* global arrayBufferToText */
+/* global arrayBufferToLines */
 /* global processPhantomData */
 /* global processDoseData */
+/* global processDoseDataFromFile */
 /* global processCsvData */
 /* global processDICOMSlice */
+/* global STREAMING_DOSE_THRESHOLD_BYTES */
 /* global showModal */
 
 // import {
@@ -216,7 +220,7 @@ d3.select('#test-files').on('click', function () {
 
   testFiles.forEach((testFile, i) => {
     const request = new XMLHttpRequest()
-    if (i !== 0) request.responseType = 'arraybuffer'
+    request.responseType = 'arraybuffer'
 
     // Get each of the test files
     request.open('GET', '../test-files/' + testFile, true)
@@ -226,13 +230,13 @@ d3.select('#test-files').on('click', function () {
         // Extract extension and file name
         const ext = request.responseURL.split('.').pop()
         const fileName = request.responseURL.split('/').pop()
+        const buffer = request.response
 
-        let response, data
+        let data
 
         if (i === 0) { // If the egsphant test file
           // Make density volume
-          response = request.response.split('\n')
-          data = processPhantomData(response)
+          data = processPhantomData(arrayBufferToLines(buffer))
           makeDensityVolume(fileName.split('.')[0], data)
 
           // Set volume viewer selector to test file
@@ -240,8 +244,7 @@ d3.select('#test-files').on('click', function () {
           volViewer.densitySelector.node().selectedIndex = densityVolumeList.length
         } else if (i === 1) { // If the DICOM dose file
           // Make dose volume
-          response = request.response
-          data = processDICOMSlice(response)
+          data = processDICOMSlice(buffer)
           const DICOMData = combineDICOMDoseData([{ data: data, ext: ext, fileName: fileName }])
 
           // Set volume viewer selector to test file
@@ -250,8 +253,7 @@ d3.select('#test-files').on('click', function () {
           volViewer.doseSelector.node().selectedIndex = doseVolumeList.length
         } else { // If the DICOM structure set file
           // Make structure set volume
-          response = request.response
-          data = processDICOMSlice(response)
+          data = processDICOMSlice(buffer)
           makeStructureSetVolume(fileName.split('.')[0], data)
 
           // Enable ROI checkboxes
@@ -421,6 +423,19 @@ function getFileReadErrorMessage (file, reader) {
 }
 
 /**
+ * Hide the progress bar once every file in a batch has finished.
+ *
+ * @param {number} fileNum
+ * @param {number} totalFiles
+ */
+function finishFileReadProgress (fileNum, totalFiles) {
+  if (fileNum === totalFiles) {
+    progressBarNode.value = progressBarNode.max
+    window.setTimeout(endProgress, 500)
+  }
+}
+
+/**
  * Read each file and create a dose or density volume object.
  *
  * @param {File} file       The file to be processed.
@@ -428,9 +443,33 @@ function getFileReadErrorMessage (file, reader) {
  * @param {File} totalFiles The total number of files to be processed.
  */
 function readFile (resolve, reject, file, fileNum, totalFiles) {
-  const reader = new FileReader()
   const fileName = file.name
   const ext = fileName.split('.').pop().toLowerCase()
+
+  if (ext === '3ddose' && file.size >= STREAMING_DOSE_THRESHOLD_BYTES) {
+    console.log('File reading started (streaming)')
+
+    processDoseDataFromFile(file, (loaded, total) => {
+      updateProgress(
+        Math.floor((loaded / total) * 100),
+        fileNum,
+        totalFiles
+      )
+    })
+      .then((data) => {
+        resolve({ data: data, ext: ext, fileName: fileName })
+        console.log('Finished processing data')
+        finishFileReadProgress(fileNum, totalFiles)
+      })
+      .catch((error) => {
+        reject(error.message || String(error))
+        finishFileReadProgress(fileNum, totalFiles)
+      })
+
+    return
+  }
+
+  const reader = new FileReader()
 
   reader.addEventListener('loadstart', function () {
     console.log('File reading started')
@@ -458,7 +497,6 @@ function readFile (resolve, reject, file, fileNum, totalFiles) {
   // File is successfully read
   reader.addEventListener('load', function (e) {
     const result = e.target.result
-    let data
 
     if (result == null) {
       reject(getFileReadErrorMessage(file, reader))
@@ -466,18 +504,10 @@ function readFile (resolve, reject, file, fileNum, totalFiles) {
     }
 
     try {
-      if (ext === 'egsphant') {
-        const resultSplit = result.split('\n')
-        data = processPhantomData(resultSplit)
-      } else if (ext === '3ddose') {
-        const resultSplit = result.split('\n')
-        data = processDoseData(resultSplit)
-      } else if (ext === 'dcm') {
-        data = processDICOMSlice(result)
-      } else if (ext === 'csv') {
-        data = processCsvData(result)
-      } else {
+      const data = processUploadedBuffer(result, ext)
+      if (data === null) {
         reject('Unknown file extension')
+        return true
       }
 
       resolve({ data: data, ext: ext, fileName: fileName })
@@ -491,20 +521,8 @@ function readFile (resolve, reject, file, fileNum, totalFiles) {
   })
 
   reader.addEventListener('loadend', function () {
-    // If all files have been loaded in
-    if (fileNum === totalFiles) {
-      // Set the bar progress to full
-      progressBarNode.value = progressBarNode.max
-      // End the progress after 500 milliseconds
-      window.setTimeout(endProgress, 500)
-    }
+    finishFileReadProgress(fileNum, totalFiles)
   })
 
-  if (ext === 'dcm' || ext === 'DCM') {
-    // Read as array buffer if DICOM
-    reader.readAsArrayBuffer(file)
-  } else {
-    // Otherwise read as text file
-    reader.readAsText(file)
-  }
+  reader.readAsArrayBuffer(file)
 }
